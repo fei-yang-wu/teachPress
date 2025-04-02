@@ -13,8 +13,9 @@ class TP_Template_Lidar implements TP_Publication_Template {
                       'description'         => 'A modern template for publication lists with LiDAR-inspired design.',
                       'author'              => 'teachPress',
                       'version'             => '1.0',
-                      'button_separator'    => ' | ',
-                      'citation_style'      => 'teachPress'
+                      'button_separator'    => '',
+                      'citation_style'      => 'teachPress',
+                      'meta_label_in'       => '',
         );
     }
     
@@ -82,7 +83,7 @@ class TP_Template_Lidar implements TP_Publication_Template {
         $s .= '</div>';
         $s .= $interface->get_author('<div class="tp_lidar_author">', '</div>');
         $s .= '<div class="tp_lidar_venue">' . $interface->get_meta() . '</div>';
-        $s .= '<div class="tp_lidar_menu">' . $interface->get_menu_line('(', ')') . '</div>';
+        $s .= '<div class="tp_lidar_menu">' . $interface->get_menu_line() . '</div>';
         $s .= $interface->get_infocontainer();
         $s .= $interface->get_images('bottom');
         $s .= '</div>';

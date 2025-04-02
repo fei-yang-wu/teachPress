@@ -264,7 +264,7 @@ class TP_Shortcodes {
         }
 
         // return filter menu
-        return '<select class="' . $atts['filter_class'] . '" name="' . $atts ['url_slug'] . '" id="' . $atts ['url_slug'] . '" tabindex="' . $atts['tabindex'] . '" onchange="teachpress_jumpMenu(' . "'" . 'parent' . "'" . ',this, ' . "'" . stripslashes(urldecode($atts['permalink'])) . "'" . ')">
+        return '<select class="tp_jumpmenu" name="' . $atts ['url_slug'] . '" id="' . $atts ['url_slug'] . '" tabindex="' . $atts['tabindex'] . '" onchange="teachpress_jumpMenu(' . "'" . 'parent' . "'" . ',this, ' . "'" . stripslashes(urldecode($atts['permalink'])) . "'" . ')">
                    <option value="' . $base . '&amp;' . $atts ['url_slug'] . '=' . $atts['html_anchor'] . '">' . $atts['title'] . '</option>
                    ' . $html . '
                 </select>';
@@ -362,7 +362,7 @@ class TP_Shortcodes {
         }
 
         // return filter menu
-        return '<select class="' . $atts['filter_class'] . '" title="' . $atts['title'] . '" name="' . $atts ['url_slug'] . '" id="' . $atts ['url_slug'] . '" tabindex="' . $atts['tabindex'] . '">
+        return '<select class="tp_selectmenu" title="' . $atts['title'] . '" name="' . $atts ['url_slug'] . '" id="' . $atts ['url_slug'] . '" tabindex="' . $atts['tabindex'] . '">
                    <option value="">' . $atts['title'] . '</option>
                    ' . $options . '
                 </select>';
@@ -524,7 +524,7 @@ class TP_Shortcodes {
             return '';
         }
 
-        return '<a rel="nofollow" href="' . $settings['permalink'] . $settings['html_anchor'] . '" title="' . esc_html__('Show all','teachpress') . '">' . esc_html__('Show all','teachpress') . '</a>';
+        return '<a class="tp_show_all" rel="nofollow" href="' . $settings['permalink'] . $settings['html_anchor'] . '" title="' . esc_html__('Show all','teachpress') . '">' . esc_html__('Show all','teachpress') . '</a>';
 
     }
 
@@ -926,7 +926,7 @@ function tp_single_shortcode ($atts) {
        'date_format'        => 'd.m.Y',
        'image'              => 'none',
        'image_size'         => 0,
-       'meta_label_in'      => esc_html__('In','teachpress') . ': ',
+       'meta_label_in'      => '', // Removed the 'in:' prefix
        'link'               => ''
     ], $atts);
 

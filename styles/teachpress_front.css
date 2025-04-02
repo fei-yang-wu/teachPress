@@ -1,3 +1,595 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Slab:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+/* Base styles */
+.teachpress_publication_list {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    width: 100%;
+    border: none;
+    border-spacing: 0;
+    color: #1d1d1f;
+    background-color: #ffffff;
+}
+
+.teachpress_publication_list td, 
+.teachpress_course_list td {
+    padding: 5px;
+}
+
+/* Headlines */
+.tp_h3 {
+    font-family: 'Roboto Slab', serif;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #003057;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.tp_h4 {
+    font-family: 'Roboto Slab', serif;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #003057;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+/* Publication info */
+.tp_pub_info {
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.tp_pub_author, 
+#content p.tp_pub_author {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    color: #003057;
+    opacity: 0.9;
+}
+
+.tp_pub_title, 
+#content p.tp_pub_title {
+    font-family: 'Roboto Slab', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: #003057;
+    letter-spacing: -0.3px;
+}
+
+.tp_pub_additional, 
+#content p.tp_pub_additional {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.95rem;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: #003057;
+    opacity: 0.8;
+}
+
+.tp_pub_menu, 
+#content p.tp_pub_menu {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    color: #003057;
+    opacity: 0.7;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.tp_pub_menu a {
+    color: #003057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tp_pub_menu a:hover {
+    color: #ffffff;
+    background: #B3A369;
+    border-color: #B3A369;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 48, 87, 0.1);
+}
+
+.tp_pub_menu i {
+    font-size: 1.1em;
+    opacity: 0.8;
+}
+
+.tp_pub_type {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    background-color: #B3A369;
+    color: #ffffff;
+    display: inline-block;
+    padding: 3px 8px;
+    margin-left: 5px;
+    margin-top: 5px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 48, 87, 0.1);
+}
+
+.tp_show_all {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #0071e3;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    background-color: #f5f5f7;
+    border: 1px solid #d2d2d7;
+    margin: 8px 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tp_show_all:hover {
+    background-color: #e8e8ed;
+    border-color: #86868b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tp_show_all {
+        background-color: #1d1d1f;
+        border-color: #424245;
+        color: #0071e3;
+    }
+
+    .tp_show_all:hover {
+        background-color: #2c2c2e;
+        border-color: #86868b;
+    }
+
+    .teachpress_publication_list {
+        color: #f5f5f7;
+        background-color: #1d1d1f;
+    }
+
+    .tp_pub_info {
+        border-color: #424245;
+    }
+
+    .tp_pub_author, 
+    #content p.tp_pub_author,
+    .tp_pub_title, 
+    #content p.tp_pub_title,
+    .tp_pub_additional, 
+    #content p.tp_pub_additional {
+        color: #f5f5f7;
+    }
+
+    .tp_pub_menu, 
+    #content p.tp_pub_menu {
+        color: #f5f5f7;
+    }
+
+    .tp_pub_menu a {
+        background: #2c2c2e;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tp_pub_menu a:hover {
+        background: #0071e3;
+        border-color: #0071e3;
+        color: #ffffff;
+    }
+
+    .tp_h3, .tp_h4 {
+        color: #f5f5f7;
+    }
+
+    .tp_bibtex_entry, 
+    .tp_abstract_entry, 
+    .tp_comment_entry, 
+    .tp_links_entry {
+        background: #2c2c2e;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tp_close {
+        color: #f5f5f7;
+    }
+
+    .tp_close:hover {
+        background: #2c2c2e;
+    }
+
+    ul.tp_pub_list li {
+        border-color: #424245;
+    }
+
+    a.tp_pub_list {
+        color: #f5f5f7;
+    }
+
+    a.tp_pub_list:hover {
+        color: #0071e3;
+    }
+
+    a.tp_show_block {
+        color: #f5f5f7;
+    }
+
+    a.tp_show_block:hover {
+        color: #0071e3;
+    }
+
+    .tablenav-pages span.inactive {
+        border-color: #424245;
+        color: #86868b;
+    }
+
+    .tablenav .tablenav-pages a {
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tablenav .tablenav-pages a:hover {
+        background: #2c2c2e;
+        border-color: #0071e3;
+        color: #0071e3;
+    }
+
+    input.tp_search_button {
+        background: #0071e3;
+        border-color: #0071e3;
+    }
+
+    input.tp_search_button:hover {
+        background: #0077ed;
+        border-color: #0077ed;
+    }
+
+    a.tp_search_reset {
+        color: #f5f5f7;
+    }
+
+    a.tp_search_reset:hover {
+        color: #0071e3;
+    }
+
+    #tp_search_input_field {
+        background: #2c2c2e;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    #tp_search_input_field:focus {
+        border-color: #0071e3;
+        box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    }
+
+    .teachpress_cloud a {
+        color: #86868b;
+    }
+
+    .teachpress_cloud a:hover {
+        color: #0071e3;
+    }
+
+    .teachpress_cloud a.teachpress_cloud_active {
+        color: #0071e3;
+    }
+
+    .teachpress_cloud a.teachpress_cloud_active:hover {
+        color: #0077ed;
+    }
+}
+
+/* Light mode improvements */
+.teachpress_publication_list {
+    transition: all 0.3s ease;
+}
+
+.tp_pub_info {
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.tp_pub_menu a {
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tp_pub_menu a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#tp_search_input_field {
+    padding: 8px 12px;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    width: 60%;
+}
+
+#tp_search_input_field:focus {
+    outline: none;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+.teachpress_cloud {
+    padding: 16px;
+    background: #f5f5f7;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.teachpress_cloud a {
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.teachpress_cloud a:hover {
+    background: rgba(0, 113, 227, 0.1);
+}
+
+.teachpress_cloud a.teachpress_cloud_active {
+    background: rgba(0, 113, 227, 0.1);
+    font-weight: 500;
+}
+
+.tp_pub_link_image {
+    max-width: 2em;
+    max-height: 2em;
+}
+
+.tp_close {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    font-family: 'Roboto', sans-serif;
+    color: #003057;
+    opacity: 0.7;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.tp_close:hover {
+    opacity: 1;
+    background: #f5f5f5;
+}
+
+.tp_pub_link img {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: inline-block;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+
+/* Course info */
+.tp_courseinfo {
+    width: 100%;
+    border: none;
+    font-family: 'Roboto', sans-serif;
+}
+
+.tp_courseinfo td {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 8px;
+}
+
+.tp_courseinfo td.tp_courseinfo_type {
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+.tp_courseinfo td.tp_courseinfo_meta p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+.tp_courseinfo td.tp_courseinfo_lecturer {
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+input.tp_search_button {
+    border: 1px solid #B3A369;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 4px;
+    background: #B3A369;
+    color: #ffffff;
+    margin: 0 0 0 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input.tp_search_button:hover {
+    background: #003057;
+    border-color: #003057;
+}
+
+a.tp_search_reset {
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    padding: 4px 8px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    color: #003057;
+    transition: all 0.2s ease;
+}
+
+a.tp_search_reset:hover {
+    color: #B3A369;
+}
+
+/* Navigation */
+.tablenav {
+    padding-top: 8px;
+    margin: 8px 0;
+    height: 30px;
+    vertical-align: middle;
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+}
+
+.tablenav-pages {
+    float: right;
+}
+
+.tablenav-pages span.inactive {
+    border: 1px solid #e0e0e0;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    color: #999;
+}
+
+.tablenav .tablenav-pages a {
+    border: 1px solid #e0e0e0;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #003057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tablenav .tablenav-pages a:hover {
+    background: #f5f5f5;
+    border-color: #B3A369;
+    color: #B3A369;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .teachpress_publication_list {
+        font-size: 0.95rem;
+    }
+    
+    .tp_h3 {
+        font-size: 1.3em;
+    }
+    
+    .tp_h4 {
+        font-size: 1.1em;
+    }
+    
+    .tp_pub_title {
+        font-size: 1rem;
+    }
+    
+    .tp_pub_author {
+        font-size: 0.95rem;
+    }
+    
+    .tp_pub_additional {
+        font-size: 0.9rem;
+    }
+    
+    .tp_pub_menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tp_pub_menu a {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .teachpress_filter select.block {
+        max-width: 100%;
+        margin: 8px 0;
+    }
+}
+
+.tp_jumpmenu {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d1d1f;
+    background-color: #ffffff;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    padding: 8px 32px 8px 12px;
+    margin: 4px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    transition: all 0.2s ease;
+    min-width: 200px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.tp_jumpmenu:hover {
+    border-color: #86868b;
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+}
+
+.tp_jumpmenu:focus {
+    outline: none;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tp_jumpmenu {
+        background-color: #1d1d1f;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tp_jumpmenu:hover {
+        border-color: #86868b;
+        background-color: #2c2c2e;
+        color: #f5f5f7;
+    }
+}
+
 /*****************************/
 /* shortcode: [tpcourseinfo] */
 /*****************************/
@@ -81,15 +673,122 @@ a.tp_search_reset:hover {color:red;}
 td.tp_pub_number, td.tp_pub_number_simple {vertical-align: top; padding: 8px; border-bottom: 1px solid silver;}
 
 /* abstract, bibtex, comment, link boxes */
-.tp_bibtex_entry, .tp_abstract_entry, .tp_comment_entry, .tp_links_entry{padding:8px 8px 8px 8px;}
-.tp_close_menu {margin-top:1px; margin-bottom:1px;}
-.tp_close {cursor:pointer; font-weight: bold;}
-.tp_pub_link img {margin: 0; width: 17px; height: 17px; padding: 0 1px 0 1px; display: inline;}
-ul.tp_pub_list li {padding: 3px 0 3px 0; list-style: none; margin-left:10px; font-size:0.9rem;}
-a.tp_pub_list {padding: 5px 0 5px 0px; background: no-repeat 0 3px; background-size: 18px 18px;}
-ul.tp_pub_list li i {width: 25px;}
-a.tp_show {color: inherit;}
-a.tp_show_block {font-weight: bold; text-decoration: none;}
+.tp_bibtex_entry {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: #1d1d1f;
+}
+
+.tp_bibtex_entry pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+    font-family: 'Roboto Mono', 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #1d1d1f;
+    font-weight: 400;
+}
+
+.tp_abstract_entry, 
+.tp_comment_entry, 
+.tp_links_entry {
+    padding: 16px;
+    margin: 12px 0;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 48, 87, 0.05);
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #003057;
+}
+
+.tp_close_menu {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.tp_close {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    font-family: 'Roboto', sans-serif;
+    color: #003057;
+    opacity: 0.7;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.tp_close:hover {
+    opacity: 1;
+    background: #f5f5f5;
+}
+
+ul.tp_pub_list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.tp_pub_list li {
+    padding: 8px 0;
+    margin-left: 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+ul.tp_pub_list li:last-child {
+    border-bottom: none;
+}
+
+a.tp_pub_list {
+    padding: 8px 0;
+    background: no-repeat 0 center;
+    background-size: 18px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #003057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+a.tp_pub_list:hover {
+    color: #B3A369;
+}
+
+ul.tp_pub_list li i {
+    width: 24px;
+    opacity: 0.8;
+}
+
+a.tp_show {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.tp_show_block {
+    font-weight: 500;
+    text-decoration: none;
+    color: #003057;
+    transition: all 0.2s ease;
+}
+
+a.tp_show_block:hover {
+    color: #B3A369;
+}
 
 /* images */
 td.tp_pub_image_left, td.tp_pub_image_right{vertical-align: top; padding: 8px; border-bottom: 1px solid silver;}
@@ -116,3 +815,86 @@ li.tp_cite_entry {font-size:0.9rem;}
 .tp_lvs_name {font-size:14px;}
 td.tp_lvs_container {margin:5px; border-bottom:1px solid silver; border-right:1px solid silver; padding:7px 5px 7px 5px;}
 .tp_lvs_comments {padding-top:5px; margin:0; min-height:17px;}
+
+.tp_selectmenu {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #1d1d1f;
+    background-color: #ffffff;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    padding: 8px 32px 8px 12px;
+    margin: 4px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    transition: all 0.2s ease;
+    min-width: 200px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tp_selectmenu:hover {
+    border-color: #86868b;
+    background-color: #f5f5f7;
+}
+
+.tp_selectmenu:focus {
+    outline: none;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+.tp_selectmenu option {
+    padding: 8px;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #1d1d1f;
+}
+
+.tp_selectmenu option:hover {
+    background-color: #f5f5f7;
+}
+
+.tp_selectmenu option:checked {
+    background-color: #0071e3;
+    color: #ffffff;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tp_selectmenu {
+        background-color: #1d1d1f;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tp_selectmenu:hover {
+        border-color: #86868b;
+        background-color: #2c2c2e;
+    }
+
+    .tp_selectmenu option {
+        background-color: #1d1d1f;
+        color: #f5f5f7;
+    }
+
+    .tp_selectmenu option:hover {
+        background-color: #2c2c2e;
+    }
+
+    .tp_bibtex_entry {
+        background: #2c2c2e;
+        border-color: #424245;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .tp_bibtex_entry pre {
+        color: #f5f5f7;
+    }
+}

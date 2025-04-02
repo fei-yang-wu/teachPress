@@ -660,7 +660,7 @@ class TP_HTML_Publication_Template {
      */
     public static function get_info_button ($name, $title, $type, $container_id) {
         $class = ( $type === 'links' ) ? 'resource' : $type;
-        $s = '<span class="tp_' . $class . '_link"><a id="tp_' . $type . '_sh_' . $container_id . '" class="tp_show" onclick="teachpress_pub_showhide(' . "'" . $container_id . "','tp_" . $type . "'" . ')" title="' . $title . '" style="cursor:pointer;">' . $name . '</a></span>';
+        $s = '<a id="tp_' . $type . '_sh_' . $container_id . '" class="tp_show" onclick="teachpress_pub_showhide(' . "'" . $container_id . "','tp_" . $type . "'" . ')" title="' . $title . '" style="cursor:pointer;">' . $name . '</a>';
         return $s;
     }
 
@@ -932,7 +932,7 @@ class TP_HTML_Publication_Template {
             return stripslashes($tag["name"]) . ', ';
         }
         else {
-            return '<a rel="nofollow" href="' . $settings['permalink'] . 'tgid=' . $tag["tag_id"] . $settings['html_anchor'] . '" title="' . esc_html__('Show all publications which have a relationship to this tag','teachpress') . '">' . stripslashes($tag["name"]) . '</a>, ';
+            return '<a class="tp_show_all" rel="nofollow" href="' . $settings['permalink'] . 'tgid=' . $tag["tag_id"] . $settings['html_anchor'] . '" title="' . esc_html__('Show all publications which have a relationship to this tag','teachpress') . '">' . stripslashes($tag["name"]) . '</a>, ';
         }
     }
 
