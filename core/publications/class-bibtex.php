@@ -319,10 +319,10 @@ class TP_Bibtex {
         
         // initial string
         if ( $row['type'] === 'presentation' ) {
-            $string = '@misc{' . stripslashes($row['bibtex']) . ',' . chr(13) . chr(10);
+            $string = '@misc{' . stripslashes($row['bibtex']) . ','  . PHP_EOL;
         }
         else {
-            $string = '@' . stripslashes($row['type']) . '{' . stripslashes($row['bibtex']) . ',' . chr(13) . chr(10);
+            $string = '@' . stripslashes($row['type']) . '{' . stripslashes($row['bibtex']) . ','  . PHP_EOL;
         }
         
         // loop for all BibTeX fields
@@ -338,20 +338,20 @@ class TP_Bibtex {
             // prepare the fields
             // ISBN | ISSN
             if ( $field_name === 'isbn' ) {
-                $string .= $isbn_label . ' = {' . $field_value . '},' . chr(13) . chr(10);
+                $string .= $isbn_label . ' = {' . $field_value . '},'  . PHP_EOL;
             }
             // year
             elseif ( $field_name === 'date' ) {
-                $string .= 'year  = {' . $row['year'] . '},' . chr(13) . chr(10);
+                $string .= 'year  = {' . $row['year'] . '},'  . PHP_EOL;
                 $string .= TP_Bibtex::prepare_bibtex_line($field_value, $field_name);
             }
             // techtype
             elseif ( $field_name=== 'techtype' ) {
-                $string .= 'type = {' . $field_value . '},' . chr(13) . chr(10);
+                $string .= 'type = {' . $field_value . '},'  . PHP_EOL;
             }
             // patent: use address as location
             elseif ( $field_name=== 'address' && $row['type']  === 'patent' ) {
-                $string .= 'location = {' . $field_value . '},' . chr(13) . chr(10);
+                $string .= 'location = {' . $field_value . '},'  . PHP_EOL;
             }
             // abstract
             elseif ( $field_name === 'abstract' || $field_name === 'title' ) {
@@ -367,7 +367,7 @@ class TP_Bibtex {
         // Add month
         if ( $row['type'] == 'booklet' ) {
             $date = tp_datesplit( $row['date'] );
-            $string .= 'month = {' . $date[0][1] . '},' . chr(13) . chr(10);
+            $string .= 'month = {' . $date[0][1] . '},'  . PHP_EOL;
         }
         
         // Add keywords
@@ -384,15 +384,15 @@ class TP_Bibtex {
         
         // Add private comment
         if ( $private_comment === true ) {
-            $string .= ',' . chr(13) . chr(10);
+            $string .= ','  . PHP_EOL;
             $string .= 'annote = {' . TP_HTML::convert_special_chars( stripslashes($row['comment'])) . '}';
         }
         
         // Add teachPress/biblatex extensions
-        $string .= ',' . chr(13) . chr(10);
-        $string .= 'pubstate = {' . $row['status'] . '},' . chr(13) . chr(10);
-        $string .= 'tppubtype = {' . $row['type'] . '}' . chr(13) . chr(10);
-        $string .= '}' . chr(13) . chr(10);
+        $string .= ','  . PHP_EOL;
+        $string .= 'pubstate = {' . $row['status'] . '},'  . PHP_EOL;
+        $string .= 'tppubtype = {' . $row['type'] . '}'  . PHP_EOL;
+        $string .= '}' . PHP_EOL;
         
         // Convert utf-8 chars
         if ( $convert_bibtex === true ) {

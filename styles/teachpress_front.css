@@ -687,7 +687,6 @@ td.tp_pub_number, td.tp_pub_number_simple {vertical-align: top; padding: 8px; bo
 }
 
 .tp_bibtex_entry pre {
-    white-space: pre-wrap;
     word-wrap: break-word;
     margin: 0;
     font-family: 'Roboto Mono', 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
