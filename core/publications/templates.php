@@ -493,14 +493,18 @@ class TP_HTML_Publication_Template {
         }
 
         // if there are links
+        // if ( $row['url'] != '' || $row['doi'] != '' ) {
+        //     if ( $settings['link_style'] === 'inline' || $settings['link_style'] === 'direct' ) {
+        //         $url = self::get_info_button(esc_html__('Links','teachpress'), esc_html__('Show links and resources','teachpress'), 'links', $container_id) . $separator;
+        //         $is_button = true;
+        //     }
+        //     else {
+        //         $url = '<span class="tp_resource_link">' . $separator . '<span class="tp_pub_links_label">' . $template_settings['menu_label_links'] . '</span>' . self::prepare_url($row['url'], $row['doi'], 'enumeration') . '</span>';
+        //     }
+        // }
         if ( $row['url'] != '' || $row['doi'] != '' ) {
-            if ( $settings['link_style'] === 'inline' || $settings['link_style'] === 'direct' ) {
-                $url = self::get_info_button(esc_html__('Links','teachpress'), esc_html__('Show links and resources','teachpress'), 'links', $container_id) . $separator;
-                $is_button = true;
-            }
-            else {
-                $url = '<span class="tp_resource_link">' . $separator . '<span class="tp_pub_links_label">' . $template_settings['menu_label_links'] . '</span>' . self::prepare_url($row['url'], $row['doi'], 'enumeration') . '</span>';
-            }
+            $url = '<span class="tp_resource_link">' . $separator . '<span class="tp_pub_links_label"></span>' . self::prepare_url($row['url'], $row['doi'], 'enumeration') . '</span>';
+            $is_button = true;
         }
 
         // if with bibtex
@@ -805,6 +809,10 @@ class TP_HTML_Publication_Template {
             $parts[0] = trim( $parts[0] );
             $parts[1] = isset( $parts[1] ) ? $parts[1] : $parts[0];
             array_push($url_displayed, $parts[0]);
+            
+            // Get the label based on the URL and title
+            $label = self::get_url_label($parts[0], $parts[1]);
+            
             // list mode
             if ( $mode === 'list' ) {
                 $length = strlen($parts[1]);
@@ -812,11 +820,11 @@ class TP_HTML_Publication_Template {
                 if ( $length > 80 ) {
                     $parts[1] .= '[...]';
                 }
-                $end .= '<li><i class="' . TP_Icons::get_class( $parts[0] ).'"></i><a class="tp_pub_list" href="' . $parts[0] . '" title="' . $parts[1] . '" target="_blank">' . $parts[1] . '</a></li>';
+                $end .= '<li><a class="tp_pub_list" href="' . $parts[0] . '" title="' . $parts[1] . '" target="_blank">' . $label . '</a></li>';
             }
             // enumeration mode
             else {
-                $end .= '<a class="tp_pub_link" href="' . $parts[0] . '" title="' . $parts[1] . '" target="_blank"><i class="' . TP_Icons::get_class( $parts[0] ).'"></i></a>';
+                $end .= '<a class="tp_pub_link" href="' . $parts[0] . '" title="' . $parts[1] . '" target="_blank">' . $label . '</a>';
             }
         }
 
@@ -828,10 +836,10 @@ class TP_HTML_Publication_Template {
             $doi_url = TEACHPRESS_DOI_RESOLVER . $doi;
             if (in_array($doi_url, $url_displayed) == False){
                 if ( $mode === 'list' ) {
-                    $end .= '<li><i class="' . TP_Icons::get_class( 'doi' ).'"></i><a class="tp_pub_list" href="' . $doi_url . '" title="' . esc_html__('Follow DOI:','teachpress') . $doi . '" target="_blank">doi:' . $doi . '</a></li>';
+                    $end .= '<li><a class="tp_pub_list" href="' . $doi_url . '" title="' . esc_html__('Follow DOI:','teachpress') . $doi . '" target="_blank">DOI</a></li>';
                 }
                 else {
-                    $end .= '<a class="tp_pub_link" href="' . $doi_url . '" title="' . esc_html__('Follow DOI:','teachpress') . $doi . '" target="_blank"><i class="' . TP_Icons::get_class( 'doi').'"></i></a>';
+                    $end .= '<a class="tp_pub_link" href="' . $doi_url . '" title="' . esc_html__('Follow DOI:','teachpress') . $doi . '" target="_blank">DOI</a>';
                 }
             }
         }
@@ -841,6 +849,63 @@ class TP_HTML_Publication_Template {
         }
 
         return $end;
+    }
+
+    /**
+     * Get the appropriate label for a URL
+     * @param string $url The URL to get the label for
+     * @param string $title The title of the link
+     * @return string The label for the URL
+     */
+    private static function get_url_label($url, $title) {
+        $url = strtolower($url);
+        $title = strtolower($title);
+        
+        // Check for project-related terms in title
+        $project_terms = array('project', 'homepage', 'website', 'site', 'webpage', 'page');
+        foreach ($project_terms as $term) {
+            if (strpos($title, $term) !== false) {
+                return 'Project Page';
+            }
+        }
+        
+        // Check for common academic/social platforms
+        if (strpos($url, 'arxiv.org') !== false) {
+            return 'arXiv';
+        }
+        if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
+            return 'YouTube';
+        }
+        if (strpos($url, 'github.com') !== false) {
+            return 'GitHub';
+        }
+        if (strpos($url, 'doi.org') !== false) {
+            return 'DOI';
+        }
+        if (strpos($url, 'slideshare.net') !== false) {
+            return 'SlideShare';
+        }
+        if (strpos($url, 'researchgate.net') !== false) {
+            return 'ResearchGate';
+        }
+        if (strpos($url, 'academia.edu') !== false) {
+            return 'Academia';
+        }
+        if (strpos($url, 'linkedin.com') !== false) {
+            return 'LinkedIn';
+        }
+        if (strpos($url, 'twitter.com') !== false) {
+            return 'Twitter';
+        }
+        if (strpos($url, 'facebook.com') !== false) {
+            return 'Facebook';
+        }
+        if (strpos($url, 'instagram.com') !== false) {
+            return 'Instagram';
+        }
+        
+        // Default to "Link" if no specific service is detected
+        return 'Link';
     }
 
     /**

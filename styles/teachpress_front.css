@@ -386,12 +386,29 @@
 
 .tp_pub_link img {
     margin: 0;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     padding: 0 4px;
     display: inline-block;
     vertical-align: middle;
     opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+.tp_pub_link img:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tp_pub_link img {
+        filter: brightness(0.8);
+    }
+    
+    .tp_pub_link img:hover {
+        filter: brightness(1);
+    }
 }
 
 /* Course info */
@@ -895,5 +912,45 @@ td.tp_lvs_container {margin:5px; border-bottom:1px solid silver; border-right:1p
 
     .tp_bibtex_entry pre {
         color: #f5f5f7;
+    }
+}
+
+.tp_pub_link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    margin: 0 4px;
+    border-radius: 4px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: #003057;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.tp_pub_link:hover {
+    background: #B3A369;
+    border-color: #B3A369;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 48, 87, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .tp_pub_link {
+        background: #2c2c2e;
+        border-color: #424245;
+        color: #f5f5f7;
+    }
+
+    .tp_pub_link:hover {
+        background: #0071e3;
+        border-color: #0071e3;
+        color: #ffffff;
     }
 }
