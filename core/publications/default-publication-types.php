@@ -161,8 +161,8 @@ function tp_register_all_publication_types() {
         array(
             'type_slug'         => 'misc',
             'bibtex_key_ext'    => 'misc',
-            'i18n_singular'     => esc_html__('Miscellaneous','teachpress'),
-            'i18n_plural'       => esc_html__('Miscellaneous','teachpress'), 
+            'i18n_singular'     => esc_html__('Manuscript under review','teachpress'),
+            'i18n_plural'       => esc_html__('Manuscript under review','teachpress'), 
             'default_fields'    => array('howpublished'), 
             'html_meta_row'     => '{howpublished}{year}{isbn}{note}' 
         ) );
