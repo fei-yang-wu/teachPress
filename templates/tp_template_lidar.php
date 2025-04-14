@@ -74,6 +74,7 @@ class TP_Template_Lidar implements TP_Publication_Template {
     public function get_entry ($interface) {
         $class = ' tp_lidar_publication_' . $interface->get_type('');
         $s = '<div class="tp_lidar_publication' . $class . '">';
+        
         $s .= $interface->get_number('<div class="tp_lidar_number">', '.</div>');
         $s .= $interface->get_images('left');
         $s .= '<div class="tp_lidar_info">';
@@ -83,7 +84,19 @@ class TP_Template_Lidar implements TP_Publication_Template {
         $s .= '</div>';
         $s .= $interface->get_author('<div class="tp_lidar_author">', '</div>');
         $s .= '<div class="tp_lidar_venue">' . $interface->get_meta() . '</div>';
-        $s .= '<div class="tp_lidar_menu">' . $interface->get_menu_line() . '</div>';
+        
+        // Get menu items
+        $menu_content = $interface->get_menu_line();
+        
+        // Add award button to menu if present
+        $award_button = '';
+        if ($interface->get_data()['row']['award'] != '' && $interface->get_data()['row']['award'] != 'none') {
+            global $tp_awards;
+            $award_data = $tp_awards->get_data($interface->get_data()['row']['award']);
+            $award_button = '<span class="tp_lidar_menu_award" data-award="' . esc_attr($interface->get_data()['row']['award']) . '"><i class="' . $award_data["icon"] . '"></i> ' . $award_data["i18n_singular"] . '</span>';
+        }
+        
+        $s .= '<div class="tp_lidar_menu">' . $award_button . $menu_content . '</div>';
         $s .= $interface->get_infocontainer();
         $s .= $interface->get_images('bottom');
         $s .= '</div>';

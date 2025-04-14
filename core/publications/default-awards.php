@@ -22,6 +22,15 @@ function tp_register_all_awards() {
             'icon'              => 'fas fa-trophy'
         ) );
     
+    // Best Paper Finalist
+    tp_register_award(
+        array(
+            'award_slug'        => 'finalist',
+            'i18n_singular'     => esc_html__('Best Paper Finalist','teachpress'),
+            'i18n_plural'       => esc_html__('Best Paper Finalists','teachpress'),
+            'icon'              => 'fas fa-star'
+        ) );
+    
     // Honorable Mention
     tp_register_award(
         array(
