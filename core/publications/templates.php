@@ -587,6 +587,15 @@ class TP_HTML_Publication_Template {
         if ( $row['status'] === 'forthcoming' ) {
             $year = esc_html__('Forthcoming','teachpress');
         }
+        else if ( $row['status'] === 'submitted' ) {
+            $submission_date = isset($row['date']) ? $row['date'] : '';
+            if ($submission_date && $submission_date !== '0000-00-00') {
+                $submission_date = date('F, Y', strtotime($submission_date));
+                $year = esc_html__('Submitted','teachpress') . ', ' . $submission_date;
+            } else {
+                $year = esc_html__('Submitted','teachpress');
+            }
+        }
         else {
             $year = isset( $row['year'] ) ? TP_HTML_Publication_Template::prepare_field('year', $row['year'],'','',$use_span) : '';
         }

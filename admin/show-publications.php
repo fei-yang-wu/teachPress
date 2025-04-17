@@ -319,6 +319,9 @@ class TP_Publications_Page {
         if ( $row->status === 'forthcoming' ) {
             echo '<span class="tp_pub_label_status">' . esc_html__('Forthcoming','teachpress') . '</span>';
         }
+        else if ( $row->status === 'submitted' ) {
+            echo '<span class="tp_pub_label_status">' . esc_html__('Submitted','teachpress') . '</span>';
+        }
         TP_HTML::line( '<div class="tp_row_actions"><a href="admin.php?page=teachpress/addpublications.php&amp;pub_id=' . intval($row->pub_id) . '" class="teachpress_link" target="_blank" title="' . esc_html__('Click to edit','teachpress') . '">' . esc_html__('Edit','teachpress') . '</a> | <a href="' . admin_url( 'admin-ajax.php' ) . '?action=teachpress&cite_id=' . intval($row->pub_id) . '" class="teachpress_cite_pub teachpress_link">' . esc_html__('Cite', 'teachpress') . '</a> | <a class="tp_row_delete" href="admin.php?page=' . $array_variables['page'] . '&amp;orderby=' . $array_variables['order'] . '&amp;checkbox%5B%5D=' . intval($row->pub_id) . '&amp;action=delete' . $get_string . '" title="' . esc_html__('Delete','teachpress') . '">' . esc_html__('Delete','teachpress') . '</a></div>' );
         TP_HTML::line('</td>');
         TP_HTML::line('<td>' . intval($row->pub_id) . '</td>');

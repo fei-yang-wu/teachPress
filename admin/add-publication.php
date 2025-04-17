@@ -45,7 +45,7 @@ function tp_add_publication_page() {
     $data['isbn'] = isset( $_POST['isbn'] ) ? htmlspecialchars($_POST['isbn']) : '';
     $data['url'] = isset( $_POST['url'] ) ? htmlspecialchars($_POST['url']) : '';
     $data['date'] = isset( $_POST['pubdate'] ) ? htmlspecialchars($_POST['pubdate']) : '';
-    $data['status'] = isset( $_POST['forthcoming'] ) ? 'forthcoming' : 'published';
+    $data['status'] = isset( $_POST['forthcoming'] ) ? 'forthcoming' : (isset( $_POST['submitted'] ) ? 'submitted' : 'published');
     $data['urldate'] = isset( $_POST['urldate'] ) ? htmlspecialchars($_POST['urldate']) : '';
     $data['booktitle'] = isset( $_POST['booktitle'] ) ? htmlspecialchars($_POST['booktitle']) : '';
     $data['issuetitle'] = isset( $_POST['issuetitle'] ) ? htmlspecialchars($_POST['issuetitle']) : '';
@@ -411,12 +411,15 @@ class TP_Publication_Page {
         $title = esc_html__('Date of publishing','teachpress');
         $placeholder = esc_html__('YYYY-MM-DD','teachpress');
         $value = ($pub_id != 0) ? $pub_data["date"] : $placeholder;
-        $checked = ( $pub_data['status'] === 'forthcoming' ) ? 'checked="checked"' : '';
+        $checked_forthcoming = ( $pub_data['status'] === 'forthcoming' ) ? 'checked="checked"' : '';
+        $checked_submitted = ( $pub_data['status'] === 'submitted' ) ? 'checked="checked"' : '';
         TP_HTML::line('<p><label for="pubdate"><b>' . $title . '</b></label></p>');
         $tabindex++;
         TP_HTML::line('<input type="text" name="pubdate" id="pubdate" title="' . $title . '" value="' . $value . '" placeholder="' . $placeholder . '" tabindex="'.$tabindex.'"/>');
-        TP_HTML::line('<input type="checkbox" name="forthcoming" id="forthcoming" value="true" ' . $checked . ' />');
+        TP_HTML::line('<input type="checkbox" name="forthcoming" id="forthcoming" value="true" ' . $checked_forthcoming . ' />');
         TP_HTML::line('<label for="forthcoming">' . esc_html__('Forthcoming','teachpress') . '</label>');
+        TP_HTML::line('<input type="checkbox" name="submitted" id="submitted" value="true" ' . $checked_submitted . ' />');
+        TP_HTML::line('<label for="submitted">' . esc_html__('Submitted','teachpress') . '</label>');
                
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
