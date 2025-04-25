@@ -83,7 +83,23 @@ class TP_Template_Lidar implements TP_Publication_Template {
         $s .= '<div class="tp_lidar_type">' . $interface->get_type() . '</div>';
         $s .= '</div>';
         $s .= $interface->get_author('<div class="tp_lidar_author">', '</div>');
-        $s .= '<div class="tp_lidar_venue">' . $interface->get_meta() . '</div>';
+        
+        // Custom meta display showing only venue and year
+        $row = $interface->get_data()['row'];
+        $venue = '';
+        if (!empty($row['journal'])) {
+            $venue = $row['journal'];
+        } elseif (!empty($row['booktitle'])) {
+            $venue = $row['booktitle'];
+        }
+        $year = !empty($row['year']) ? $row['year'] : '';
+        $meta_text = $venue;
+        if ($venue && $year) {
+            $meta_text .= ', ' . $year;
+        } elseif ($year) {
+            $meta_text = $year;
+        }
+        $s .= '<div class="tp_lidar_venue">' . $meta_text . '</div>';
         
         // Get menu items
         $menu_content = $interface->get_menu_line();
@@ -93,7 +109,11 @@ class TP_Template_Lidar implements TP_Publication_Template {
         if ($interface->get_data()['row']['award'] != '' && $interface->get_data()['row']['award'] != 'none') {
             global $tp_awards;
             $award_data = $tp_awards->get_data($interface->get_data()['row']['award']);
-            $award_button = '<span class="tp_lidar_menu_award" data-award="' . esc_attr($interface->get_data()['row']['award']) . '"><i class="' . $award_data["icon"] . '"></i> ' . $award_data["i18n_singular"] . '</span>';
+            // Use award detail if available, otherwise use default award text
+            $award_text = !empty($interface->get_data()['row']['award_details']) ? 
+                         $interface->get_data()['row']['award_details'] : 
+                         $award_data["i18n_singular"];
+            $award_button = '<span class="tp_lidar_menu_award" data-award="' . esc_attr($interface->get_data()['row']['award']) . '"><i class="' . $award_data["icon"] . '"></i> ' . $award_text . '</span>';
         }
         
         $s .= '<div class="tp_lidar_menu">' . $award_button . $menu_content . '</div>';
