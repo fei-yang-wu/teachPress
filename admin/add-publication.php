@@ -1,7 +1,7 @@
-<?php 
+<?php
 /**
  * This file contains all functions for displaying the add_publication page in admin menu
- * 
+ *
  * @package teachpress\admin\publications
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
  */
@@ -19,16 +19,16 @@ function tp_add_publication_page_help () {
                         <p><b>' . esc_html__('URL/Files','teachpress') . '</b></p>
                         <p>' . esc_html__('You can add one URL or file per line. Insert the name of the URL/file behind the address and separate it by a comma and a space. Example:', 'teachpress') . '<br />http://mywebsite.com/docs/readme.pdf, Basic Instructions</p>'
     ) );
-} 
+}
 
-/** 
+/**
  * New publication / edit publication
  * from show_publications.php (GET):
  * @param int $pub_id       publication ID
  * @since 5.0.0
 */
 function tp_add_publication_page() {
-   
+
     // WordPress current unser info
     $current_user = wp_get_current_user();
     $user = $current_user->ID;
@@ -85,7 +85,7 @@ function tp_add_publication_page() {
     $pub_id = isset( $_REQUEST['pub_id'] ) ? intval($_REQUEST['pub_id']) : 0;
 
     echo '<div class="wrap">';
-    
+
     // headline
     if ( $pub_id === 0 ) {
         echo '<h2>' . esc_html__('Add a new publication','teachpress') . '</h2>';
@@ -93,41 +93,47 @@ function tp_add_publication_page() {
     else {
         echo '<h2>' . esc_html__('Edit publication','teachpress') . ' <a href="admin.php?page=teachpress/addpublications.php" class="add-new-h2">' . esc_html__('Create','teachpress') . '</a></h2>';
     }
-    
+
     echo '<form name="form1" method="post" action="' . esc_url($_SERVER['REQUEST_URI']) . '" id="form1">';
     wp_nonce_field( 'verify_teachpress_pub_edit', 'tp_nonce', true, true );
-   
+
     // create related content (post/page/...)
     if ( isset($_POST['create_rel_content']) ) {
         TP_Publication_Page::check_nonce_field();
         $data['rel_page'] = tp_add_publication_as_post( $data['title'], $data['bibtex'], $data['date'], get_tp_option('rel_page_publications'), $tags, array(get_tp_option('rel_content_category')) );
     }
-    
+
     // create publication and related page
     if ( isset($_POST['create_pub']) ) {
         TP_Publication_Page::check_nonce_field();
         $pub_id = TP_Publications::add_publication($data, $tags, $new_bookmarks);
         TP_DB_Helpers::prepare_meta_data($pub_id, $fields, $_POST, 'publications');
+        TP_Publication_Page::save_author_annotation_settings($pub_id, $_POST);
         $message = esc_html__('Publication added','teachpress') . ' <a href="admin.php?page=teachpress/addpublications.php">' . esc_html__('Add new','teachpress') . '</a>';
         get_tp_message($message);
     }
-    
+
     // save publication
     if ( isset($_POST['speichern']) ) {
         TP_Publication_Page::check_nonce_field();
         TP_Publications::delete_pub_meta($pub_id);
         TP_Publications::change_publication($pub_id, $data, $tags, $delbox, $new_bookmarks, $del_bookmarks);
         TP_DB_Helpers::prepare_meta_data($pub_id, $fields, $_POST, 'publications');
+        TP_Publication_Page::save_author_annotation_settings($pub_id, $_POST);
         get_tp_message( esc_html__('Saved') );
     }
-    
+
     // Default values
     if ( $pub_id != 0 ) {
         $pub_data = TP_Publications::get_publication($pub_id, ARRAY_A);
         $pub_meta = TP_Publications::get_pub_meta($pub_id);
+        $pub_data['author_annotation_marker'] = TP_Publication_Page::get_meta_value($pub_meta, 'tp_author_annotation_marker');
+        $pub_data['author_annotation_message'] = TP_Publication_Page::get_meta_value($pub_meta, 'tp_author_annotation_message');
     }
     else {
         $pub_data = tp_get_default_structure();
+        $pub_data['author_annotation_marker'] = '';
+        $pub_data['author_annotation_message'] = '';
         $pub_meta = array ( array('meta_key' => '', 'meta_value' => '') );
     }
 
@@ -138,36 +144,36 @@ function tp_add_publication_page() {
             get_tp_message( esc_html__('Please check the format of author/editor information and correct it to the following format: firstname1 lastname1 and firstname2 lastname 2. Example: Adam Smith and John M. Keynes','teachpress') , 'orange');
         }
     }
-    
+
     // input fields
     echo '<input name="page" type="hidden" value="teachpress/addpublications.php">';
     if ( $pub_id != 0 ) {
         echo '<input type="hidden" name="pub_id" value="' . intval($pub_id) . '" />';
     }
-    
+
     echo '<div class="tp_postbody">';
-    
+
     echo '<div class="tp_postcontent">';
     echo '<div id="post-body">';
     echo '<div id="post-body-content">';
-    
+
     echo '<div id="titlediv" style="padding-bottom: 15px;">';
     echo '<div id="titlewrap">';
     echo '<label class="hide-if-no-js" style="display:none;" id="title-prompt-text" for="title">' . esc_html__('Title','teachpress') . '</label>';
     echo '<input type="text" name="tp_post_title" size="30" title="' . esc_html__('Title','teachpress') . '" tabindex="1" value="' . stripslashes($pub_data["title"]) . '" id="title" placeholder="' . esc_html__('Title','teachpress') . '" autocomplete="off" />';
     echo '</div>';
     echo '</div>';
-    
+
     TP_Publication_Page::get_general_box ($pub_id, $pub_data);
     TP_Publication_Page::get_main_box ($pub_id, $pub_data);
     TP_Publication_Page::get_comments_box ($pub_data);
-    if ( count($fields) !== 0 ) { 
-        TP_Admin::display_meta_data($fields, $pub_meta);       
-    } 
+    if ( count($fields) !== 0 ) {
+        TP_Admin::display_meta_data($fields, $pub_meta);
+    }
     echo '</div>';
     echo '</div>';
     echo '</div>';
-    
+
     TP_HTML::div_open('tp_postcontent_right');
     TP_Publication_Page::get_publication_box($pub_id);
     TP_Publication_Page::get_bookmarks_box ($pub_id, $user);
@@ -175,7 +181,7 @@ function tp_add_publication_page() {
     TP_Publication_Page::get_image_box ($pub_data);
     TP_Publication_Page::get_rel_page_box ($pub_data);
     TP_HTML::div_close('tp_postcontent_right');
-    
+
     echo '</form>';
     TP_Publication_Page::print_scripts();
     echo '</div>';
@@ -187,21 +193,61 @@ function tp_add_publication_page() {
  * @since 5.0.0
  */
 class TP_Publication_Page {
-    
+
+    /**
+     * Returns a single meta value from a publication meta array.
+     * @param array $pub_meta
+     * @param string $meta_key
+     * @return string
+     */
+    public static function get_meta_value($pub_meta, $meta_key) {
+        foreach ( $pub_meta as $row ) {
+            if ( isset($row['meta_key']) && $row['meta_key'] === $meta_key ) {
+                return isset($row['meta_value']) ? $row['meta_value'] : '';
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Saves publication-level author annotation settings.
+     * @param int $pub_id
+     * @param array $post
+     */
+    public static function save_author_annotation_settings($pub_id, $post) {
+        $allowed_markers = array('', '*', '†', '‡');
+        $marker = isset($post['tp_author_annotation_marker']) ? sanitize_text_field($post['tp_author_annotation_marker']) : '';
+        $message = isset($post['tp_author_annotation_message']) ? sanitize_text_field($post['tp_author_annotation_message']) : '';
+
+        if ( !in_array($marker, $allowed_markers, true) ) {
+            $marker = '';
+        }
+
+        TP_Publications::delete_pub_meta($pub_id, 'tp_author_annotation_marker');
+        TP_Publications::delete_pub_meta($pub_id, 'tp_author_annotation_message');
+
+        if ( $marker !== '' ) {
+            TP_Publications::add_pub_meta($pub_id, 'tp_author_annotation_marker', $marker);
+        }
+        if ( $message !== '' ) {
+            TP_Publications::add_pub_meta($pub_id, 'tp_author_annotation_message', $message);
+        }
+    }
+
     public static function get_publication_box($pub_id) {
         TP_HTML::div_open('postbox');
         TP_HTML::line('<h3 class="tp_postbox"><span>' . esc_html__('Publications','teachpress') . '</span></h3>');
-        
+
         // Add, Save, Reset buttons
         TP_HTML::line('<div id="major-publishing-actions">');
         TP_HTML::line('<div style="text-align: center;"> ');
-        if ( $pub_id === 0 ) { 
+        if ( $pub_id === 0 ) {
             TP_HTML::line('<input type="reset" name="Reset" value="' . esc_html__('Reset','teachpress') . '" id="teachpress_reset" class="button-secondary" style="padding-right: 30px;">');
             TP_HTML::line('<input name="create_pub" type="submit" class="button-primary" id="create_publication_submit" value="' . esc_html__('Create','teachpress') . '">');
         }
-        else { 
+        else {
             TP_HTML::line('<input type="submit" name="speichern" id="save_publication_submit" value="' . esc_html__('Save') . '" class="button-primary" title="' . esc_html__('Save') . '">');
-        }  
+        }
         TP_HTML::line('</div>');
         TP_HTML::line('</div>');
         TP_HTML::div_close('postbox');
@@ -218,10 +264,10 @@ class TP_Publication_Page {
         TP_HTML::div_open('postbox');
         TP_HTML::line('<h3 class="tp_postbox"><span>' . esc_html__('Bookmarks','teachpress') . '</span></h3>');
         TP_HTML::div_open('inside');
-        
+
         // Current Bookmarks
         self::get_current_bookmarks($pub_id, $user);
-        
+
         // Add Bookmarks
         TP_HTML::line('<p><b>' . esc_html__('New','teachpress') . '</b></p>');
         TP_HTML::line('<select name="new_bookmarks[]" id="new_bookmarks" multiple style="width:90%;">');
@@ -231,12 +277,12 @@ class TP_Publication_Page {
         }
         var_dump($users);
         TP_HTML::line('</select>');
-        
-        
+
+
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
     }
-    
+
     /**
      * Gets the comment box
      * @param array $pub_data   An associative array with publication data
@@ -246,7 +292,7 @@ class TP_Publication_Page {
         TP_HTML::div_open('postbox');
         TP_HTML::line('<h3 class="tp_postbox"><span>' . esc_html__('Comments','teachpress') . '</span></h3>');
         TP_HTML::div_open('inside');
-        
+
         // comment
         TP_Admin::get_form_field(
             array(
@@ -256,9 +302,9 @@ class TP_Publication_Page {
                 'type'      => 'textarea',
                 'value'     => $pub_data['comment'],
                 'tabindex'  => 31,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:95%; height: 75px;'), true );
-        
+
         // note
         TP_Admin::get_form_field(
             array(
@@ -268,13 +314,13 @@ class TP_Publication_Page {
                 'type'      => 'textarea',
                 'value'     => $pub_data['note'],
                 'tabindex'  => 32,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:95%; height: 75px;'), true );
-        
+
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
     }
-    
+
     /**
      * Gets the current tags of a publication
      * @param int $pub_id   The ID of the publication
@@ -292,9 +338,9 @@ class TP_Publication_Page {
             $label = stripslashes($row->name);
             $onclick = "teachpress_change_label_color('delbox_" . $id . "', 'delbox_label_" . $id . "')";
             TP_HTML::line('<input name="delbox[]" type="checkbox" value="' . $id . '" id="delbox_' . $id . '" onclick="' . $onclick . '"/> <label for="delbox_' . $id . '" title="Tag &laquo;' . $label . '&raquo; ' . esc_html__('Delete','teachpress') . '" id="delbox_label_' . $id . '">' . $label . '</label><br />');
-        } 
+        }
     }
-    
+
     /**
      * Prints the current bookmarks list
      * @param int $pub_id
@@ -306,32 +352,32 @@ class TP_Publication_Page {
         if ( $pub_id === 0 ) {
             return;
         }
-        
-        $bookmarks = TP_Bookmarks::get_bookmarks( array( 
+
+        $bookmarks = TP_Bookmarks::get_bookmarks( array(
                         'pub_id'        => $pub_id,
                         'output_type'   => ARRAY_A  ) );
-        
+
         TP_HTML::line('<p><b>' . esc_html__('Current','teachpress') . '</b></p>');
-        
+
         foreach ( $bookmarks as $row ) {
             $user_info = get_userdata($row['user']);
-            
+
             // if there is no data
             if ($user_info === false) {
                 continue;
             }
-            
+
             // Print use name with checkbox
             $id = $row['bookmark_id'];
             $user_id = $user_info->ID;
             $name = $user_info->display_name;
             $icon = ( $user_id === $current_user_id ) ? ' <i class="fas fa-user"></i>' : '';
             $onclick = "teachpress_change_label_color('bookmark_" . $id . "', 'bookmark_label_" . $id . "')";
-            
+
         TP_HTML::line('<input type="checkbox" name="del_bookmarks[]" id="bookmark_' . $id . '" value="' . $id . '" onclick="' . $onclick . '" title="' . esc_html__('Delete bookmark for','teachpress') . ' ' . $name . '"/> <label for="bookmark_' . $id . '" title="' . esc_html__('Delete bookmark for','teachpress') . ' ' . $name . '" id="bookmark_label_' . $id . '" class="tp_bookmarks">' . $name . $icon . '</label><br />');
         }
-        
-            
+
+
     }
 
 
@@ -347,7 +393,7 @@ class TP_Publication_Page {
         TP_HTML::div_open('inside');
         TP_HTML::line('<table>');
         TP_HTML::line('<tr>');
-        
+
         $tabindex = 1;
         // Publication type
         TP_HTML::line('<td style="border:none; padding:0; margin: 0;">');
@@ -358,7 +404,7 @@ class TP_Publication_Page {
         echo get_tp_publication_type_options ($pub_data["type"], $mode = 'sng');
         TP_HTML::line('</select>');
         TP_HTML::line('</td>');
-        
+
         // BibTex key
         TP_HTML::line('<td style="border:none; padding: 0 0 0 30px; margin: 0;">');
         $title = esc_html__('A simple unique key without spaces','teachpress');
@@ -377,10 +423,10 @@ class TP_Publication_Page {
         echo get_tp_award_options ($pub_data["award"]);
         TP_HTML::line('</select>');
         TP_HTML::line('</td>');
-        
+
         TP_HTML::line('</tr>');
         TP_HTML::line('</table>');
-      
+
         // author
         $tabindex++;
         TP_Admin::get_form_field(
@@ -391,9 +437,9 @@ class TP_Publication_Page {
                 'type'      => 'textarea',
                 'value'     => $pub_data['author'],
                 'tabindex'  => $tabindex,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:95%; height: 65px;'), true );
-        
+
         // editor
         $tabindex++;
         TP_Admin::get_form_field(
@@ -404,9 +450,29 @@ class TP_Publication_Page {
                 'type'      => 'textarea',
                 'value'     => $pub_data['editor'],
                 'tabindex'  => $tabindex,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:95%; height: 65px;'), true );
-        
+
+        TP_HTML::line('<p><label for="tp_author_annotation_marker" title="' . esc_html__('If author names contain a marker (e.g. *), you can define a legend text shown after the author list.','teachpress') . '"><b>' . esc_html__('Author marker legend','teachpress') . '</b></label></p>');
+        TP_HTML::line('<select name="tp_author_annotation_marker" id="tp_author_annotation_marker" style="width: 140px;">');
+        TP_Admin::get_select_option('', esc_html__('none','teachpress'), $pub_data['author_annotation_marker'], true);
+        TP_Admin::get_select_option('*', '*', $pub_data['author_annotation_marker'], true);
+        TP_Admin::get_select_option('†', '†', $pub_data['author_annotation_marker'], true);
+        TP_Admin::get_select_option('‡', '‡', $pub_data['author_annotation_marker'], true);
+        TP_HTML::line('</select>');
+
+        TP_Admin::get_form_field(
+            array(
+                'name'      => 'tp_author_annotation_message',
+                'title'     => esc_html__('Legend text appended at the end of the author list when the selected marker appears. Example: Equally contributed','teachpress'),
+                'label'     => esc_html__('Author marker text','teachpress'),
+                'type'      => 'input',
+                'value'     => $pub_data['author_annotation_message'],
+                'tabindex'  => $tabindex,
+                'display'   => 'block',
+                'style'     => 'width:95%;'),
+            true );
+
         // pubdate
         $title = esc_html__('Date of publishing','teachpress');
         $placeholder = esc_html__('YYYY-MM-DD','teachpress');
@@ -420,7 +486,7 @@ class TP_Publication_Page {
         TP_HTML::line('<label for="forthcoming">' . esc_html__('Forthcoming','teachpress') . '</label>');
         TP_HTML::line('<input type="checkbox" name="submitted" id="submitted" value="true" ' . $checked_submitted . ' />');
         TP_HTML::line('<label for="submitted">' . esc_html__('Submitted','teachpress') . '</label>');
-               
+
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
     }
@@ -434,18 +500,18 @@ class TP_Publication_Page {
         TP_HTML::div_open('postbox');
         TP_HTML::line('<h3 class="tp_postbox">' . esc_html__('Image','teachpress') . '</span></h3>');
         TP_HTML::div_open('inside');
-        
+
         // Image URL
         if ( $pub_data["image_url"] != '' ) {
             TP_HTML::line('<p><img name="tp_pub_image" src="' . $pub_data["image_url"] . '" alt="' . $pub_data["title"] . '" title="' . $pub_data["title"] . '" style="max-width:100%;"/></p>');
         }
-        
+
         $title = esc_html__('With the image field you can add an image to a publication. You can display images in all publication lists','teachpress');
         TP_HTML::line('<p><label for="image_url" title="' . $title . '"><b>' . esc_html__('Image URL','teachpress') . '</b></label></p>');
-        
+
         TP_HTML::line('<input name="image_url" id="image_url" class="upload" type="text" title="' . $title . ' style="width:90%;" value="' . $pub_data["image_url"] . '" tabindex="34"/>');
         TP_HTML::line('<a class="upload_button_image" title="' . esc_html__('Add Image','teachpress') . '" style="cursor:pointer; border:none;"><i class="far fa-image"></i></a>');
-        
+
         // Image Link Target
         TP_HTML::line( '<p><label for="image_target" title="' . esc_html__('Define the link target for the image.','teachpress') . '"><b>' . esc_html__('Image Link Target','teachpress') . '</b></label></p>');
         TP_HTML::line( '<select name="image_target" id="image_target" title="' . esc_html__('Define the link target for the image.','teachpress') . '" style="width:90%;" tabindex="35">');
@@ -466,13 +532,13 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['image_ext'],
                 'tabindex'  => 36,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:90%;'), true );
-               
+
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
     }
-    
+
     /**
      * Gets the related page box
      * @param array $pub_data   An associative array with publication data
@@ -484,24 +550,24 @@ class TP_Publication_Page {
         TP_HTML::div_open('inside');
         TP_HTML::line('<p><label for="rel_page" title="' . esc_html__('Select a post/page with releated content.','teachpress') . '"><b>' . esc_html__('Related content','teachpress') . '</b></label></p>');
         TP_HTML::line('<div style="overflow:hidden;">');
-        
+
         // SELECT field
         TP_HTML::line('<select name="rel_page" id="rel_page" title="' . esc_html__('Select a post/page with releated content.','teachpress') . '" style="width:90%;" tabindex="37">');
         $post_type = get_tp_option('rel_page_publications');
-        get_tp_wp_pages("menu_order", "ASC", $pub_data["rel_page"], $post_type, 0, 0); 
+        get_tp_wp_pages("menu_order", "ASC", $pub_data["rel_page"], $post_type, 0, 0);
         TP_HTML::line('</select>');
-        
+
         // New related content link
         TP_HTML::line('<p style="padding:5px 0 0 5px;">');
         $value = ( get_tp_option('rel_content_auto') == '1' ) ? '1' : '0';
-        TP_Admin::get_checkbox('create_rel_content', esc_html__('Create related content','teachpress'), $value, false, true); 
+        TP_Admin::get_checkbox('create_rel_content', esc_html__('Create related content','teachpress'), $value, false, true);
         TP_HTML::line('</p>');
-        
+
         TP_HTML::div_close();
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
-    } 
-    
+    }
+
     /**
      * Gets the main box
      * @param int $pub_id       The ID of the publication
@@ -518,13 +584,13 @@ class TP_Publication_Page {
         else {
             $default_fields = $publication_types['article']['default_fields'];
         }
-        
+
         TP_HTML::div_open('postbox');
-        
+
         TP_HTML::line('<h3 class="tp_postbox"><span>' . esc_html__('Detailed information','teachpress') . '</span> | <small><a id="show_all_fields" onclick="teachpress_publicationFields(' . "'" . 'all' . "'" . ');" style="cursor:pointer; display:inline;">' . esc_html__('Show all fields','teachpress') . '</a> <a id="show_recommend_fields" onclick="teachpress_publicationFields(' . "'" . 'std2' . "'" . ');" style="cursor:pointer; display:none;">' . esc_html__('Show recommend fields','teachpress') . '</a></small></h3>');
-        
+
         TP_HTML::div_open('inside');
-        
+
         $tabindex = 8;
         // booktitle
         TP_Admin::get_form_field(
@@ -536,7 +602,7 @@ class TP_Publication_Page {
                 'value'     => $pub_data['booktitle'],
                 'tabindex'  => $tabindex,
                 'display'   => ( in_array('booktitle', $default_fields) ) ? 'block' : 'none',
-                'style'     => 'width:95%; height: 58px;'), 
+                'style'     => 'width:95%; height: 58px;'),
             true );
 
         // issuetitle
@@ -550,7 +616,7 @@ class TP_Publication_Page {
                 'value'     => $pub_data['issuetitle'],
                 'tabindex'  => $tabindex,
                 'display'   => ( in_array('issuetitle', $default_fields) ) ? 'block' : 'none',
-                'style'     => 'width:95%; height: 58px;'), 
+                'style'     => 'width:95%; height: 58px;'),
             true );
 
         // journal
@@ -564,9 +630,9 @@ class TP_Publication_Page {
                 'value'     => $pub_data['journal'],
                 'tabindex'  => $tabindex,
                 'display'   => ( in_array('journal', $default_fields) ) ? 'block' : 'none',
-                'style'     => 'width:95%;'), 
+                'style'     => 'width:95%;'),
             true );
-        
+
         // volume
         $tabindex++;
         TP_Admin::get_form_field(
@@ -577,9 +643,9 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['volume'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('volume', $default_fields) ) ? 'block' : 'none'), 
+                'display'   => ( in_array('volume', $default_fields) ) ? 'block' : 'none'),
             true );
-        
+
         // volume
         $tabindex++;
         TP_Admin::get_form_field(
@@ -590,7 +656,7 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['issue'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('issue', $default_fields) ) ? 'block' : 'none'), 
+                'display'   => ( in_array('issue', $default_fields) ) ? 'block' : 'none'),
             true );
 
         // number
@@ -603,7 +669,7 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['number'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('number', $default_fields) ) ? 'block' : 'none'), 
+                'display'   => ( in_array('number', $default_fields) ) ? 'block' : 'none'),
             true );
 
         // pages
@@ -616,9 +682,9 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['pages'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('pages', $default_fields) ) ? 'block' : 'none'), 
+                'display'   => ( in_array('pages', $default_fields) ) ? 'block' : 'none'),
             true );
-        
+
 
         // publisher
         $tabindex++;
@@ -631,7 +697,7 @@ class TP_Publication_Page {
                 'value'     => $pub_data['publisher'],
                 'tabindex'  => $tabindex,
                 'display'   => ( in_array('publisher', $default_fields) ) ? 'block' : 'none',
-                'style'     => 'width:95%;'), 
+                'style'     => 'width:95%;'),
             true );
 
         // address
@@ -647,7 +713,7 @@ class TP_Publication_Page {
                 'display'   => ( in_array('address', $default_fields) ) ? 'block' : 'none',
                 'style'     => 'width:95%;'),
             true);
-        
+
 
         // edition
         $tabindex++;
@@ -697,7 +763,7 @@ class TP_Publication_Page {
             array(
                 'name'      => 'organization',
                 'title'     => esc_html__('The names of a sponsoring organization','teachpress'),
-                'label'     => esc_html__('Organization','teachpress'), 
+                'label'     => esc_html__('Organization','teachpress'),
                 'type'      => 'input',
                 'value'     => $pub_data['organization'],
                 'tabindex'  => $tabindex,
@@ -711,7 +777,7 @@ class TP_Publication_Page {
             array(
                 'name'      => 'school',
                 'title'     => esc_html__('The names of the academic instituion where a thesis was written','teachpress'),
-                'label'     => esc_html__('School','teachpress'), 
+                'label'     => esc_html__('School','teachpress'),
                 'type'      => 'input',
                 'value'     => $pub_data['school'],
                 'tabindex'  => $tabindex,
@@ -725,7 +791,7 @@ class TP_Publication_Page {
             array(
                 'name'      => 'series',
                 'title'     => esc_html__('The name of a series','teachpress'),
-                'label'     => esc_html__('Series','teachpress'), 
+                'label'     => esc_html__('Series','teachpress'),
                 'type'      => 'input',
                 'value'     => $pub_data['series'],
                 'tabindex'  => $tabindex,
@@ -739,7 +805,7 @@ class TP_Publication_Page {
             array(
                 'name'      => 'crossref',
                 'title'     => esc_html__('The BibTeX key this work is referring to','teachpress'),
-                'label'     => esc_html__('Crossref','teachpress'), 
+                'label'     => esc_html__('Crossref','teachpress'),
                 'type'      => 'input',
                 'value'     => $pub_data['crossref'],
                 'tabindex'  => $tabindex,
@@ -771,10 +837,10 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['howpublished'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('howpublished', $default_fields) ) ? 'block' : 'none', 
+                'display'   => ( in_array('howpublished', $default_fields) ) ? 'block' : 'none',
                 'style'     => 'width:95%;'),
             true );
-        
+
         // key
         $tabindex++;
         TP_Admin::get_form_field(
@@ -785,7 +851,7 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['key'],
                 'tabindex'  => $tabindex,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => ''),
             true );
 
@@ -799,10 +865,10 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['techtype'],
                 'tabindex'  => $tabindex,
-                'display'   => ( in_array('techtype', $default_fields) ) ? 'block' : 'none', 
+                'display'   => ( in_array('techtype', $default_fields) ) ? 'block' : 'none',
                 'style'     => ''),
             true );
-        
+
         // isbn
         $checked_1 = ( $pub_data["is_isbn"] == '1' || $pub_id === 0 ) ? 'checked="checked"' : '';
         $checked_2 = ($pub_data["is_isbn"] == '0') ? 'checked="checked"' : '';
@@ -816,8 +882,8 @@ class TP_Publication_Page {
         $tabindex++;
         TP_HTML::line('<label><input name="is_isbn" type="radio" value="0" id="is_isbn_1" ' . $checked_2 . ' tabindex="'.$tabindex.'"/>' . esc_html__('ISSN','teachpress') . '</label>');
         TP_HTML::line('</span>');
-        TP_HTML::div_close('div_isbn');   
-      
+        TP_HTML::div_close('div_isbn');
+
         // doi
         $tabindex++;
         TP_Admin::get_form_field(
@@ -828,10 +894,10 @@ class TP_Publication_Page {
                 'type'      => 'input',
                 'value'     => $pub_data['doi'],
                 'tabindex'  => $tabindex,
-                'display'   => 'block', 
+                'display'   => 'block',
                 'style'     => 'width:95%;'),
             true );
-        
+
         // urldate
         $display = ($pub_data["type"] === 'online' || $pub_data["type"] === 'periodical') ? 'style="display:block;"' : 'style="display:none;"';
         $title = esc_html__('The date you have visited the online resource','teachpress');
@@ -842,7 +908,7 @@ class TP_Publication_Page {
         $tabindex++;
         TP_HTML::line('<input type="text" name="urldate" id="urldate" title="' . $title . '" value="' . $value . '" placeholder="' . $placeholder . '" tabindex="'.$tabindex.'"/>');
         TP_HTML::div_close('div_urldate');
-        
+
         // url
         TP_HTML::div_open('div_url');
         TP_HTML::line('<p><label for="url" title="' . esc_html__('URL/Files', 'teachpress') . '"><b>' . esc_html__('URL/Files', 'teachpress') . '</b></label> | ');
@@ -851,10 +917,10 @@ class TP_Publication_Page {
         $tabindex++;
         TP_HTML::line('<textarea name="url" type="text" id="url" class="upload" title="' . esc_html__('You can add one URL or file per line. Insert the name of the URL/file behind the address and separate it by a comma and a space. Example:', 'teachpress') . ' http://mywebsite.com/docs/readme.pdf, Basic Instructions" style="width:95%" rows="4" tabindex="'.$tabindex.'">' . $pub_data["url"] . '</textarea>');
         TP_HTML::div_close('div_url');
-        
+
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
-        
+
     }
 
 
@@ -884,7 +950,7 @@ class TP_Publication_Page {
         TP_HTML::div_close('inside');
         TP_HTML::div_close('postbox');
     }
-    
+
     /**
      * Convert $tags array to a comma separate string
      * @param array $tags
@@ -897,20 +963,20 @@ class TP_Publication_Page {
         }
         return $end;
     }
-    
+
     /**
      * Checks the nonce field of the form. If the check fails wp_die() will be executed
      * @since 9.0.5
      */
     public static function check_nonce_field () {
-        if ( ! isset( $_POST['tp_nonce'] ) 
-            || ! wp_verify_nonce( $_POST['tp_nonce'], 'verify_teachpress_pub_edit' ) 
+        if ( ! isset( $_POST['tp_nonce'] )
+            || ! wp_verify_nonce( $_POST['tp_nonce'], 'verify_teachpress_pub_edit' )
         ) {
            wp_die('teachPress error: This request could not be verified!');
            exit;
         }
     }
-    
+
     /**
      * Gets the javascripts for this page
      * @since 5.0.0
@@ -918,7 +984,7 @@ class TP_Publication_Page {
     public static function print_scripts () {
         global $tp_publication_types;
         $publication_types = $tp_publication_types->get();
-        
+
         ?>
         <script>
             // SELECT fields
@@ -990,8 +1056,8 @@ class TP_Publication_Page {
                     }
                 }
                 var last_name = prefix + name[count - 1];
-                
-                $.get(ajaxurl + "?action=teachpress&bibtex_key_check=" + last_name + year, 
+
+                $.get(ajaxurl + "?action=teachpress&bibtex_key_check=" + last_name + year,
                     function(text){
                         document.getElementById("bibtex").value = text;
                     });
@@ -1007,7 +1073,7 @@ class TP_Publication_Page {
             $('#url').resizable({handles: "se", minHeight: 80, minWidth: 500});
             $('#comment').resizable({handles: "se", minHeight: 70, minWidth: 400});
             $('#note').resizable({handles: "se", minHeight: 70, minWidth: 400});
-                            
+
             var availableAuthors = [
                 <?php
                 $start2 = '';
@@ -1019,10 +1085,10 @@ class TP_Publication_Page {
                     }
                     else {
                         echo ',"' . esc_js($row->name) . '"';
-                    }        
+                    }
                 } ?>];
-            
-            
+
+
             function split( val ) {
                 return val.split( /,\s*/ );
             }
@@ -1030,7 +1096,7 @@ class TP_Publication_Page {
             function split_authors( val ) {
                 return val.split( /\sand\s*/ );
             }
-            
+
             function extractLast_authors( term ) {
                 return split_authors( term ).pop();
             }

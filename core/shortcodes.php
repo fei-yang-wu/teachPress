@@ -120,7 +120,7 @@ class TP_Shortcodes {
         }
         return self::generate_filter_selectmenu($row, $defaults);
     }
-    
+
     /**
      * Merges for example the input for the exclude_tags and hide_tags filter to one single entry
      * @param string $string1
@@ -129,11 +129,11 @@ class TP_Shortcodes {
      * @since 9.0.2
      */
     private static function generate_merged_string($string1, $string2) {
-        // reduce processing 
+        // reduce processing
         if ( $string1 === '' ) {
             return $string2;
         }
-        
+
         $array1 = explode(',', $string1);
         $array2 = explode(',', $string2);
         $array = array_merge($array1, $array2);
@@ -243,7 +243,7 @@ class TP_Shortcodes {
                 $text = tp_translate_pub_type($row['type'], 'pl');
             }
             else if ( $key === 'author' ) {
-                $text = TP_Bibtex::parse_author($row['name'], '', $atts['author_name']);
+                $text = TP_Bibtex::parse_author($row['name'], '', $atts['author_name'], '', false);
             }
             else if ( $key === 'user' ) {
                 $user_info = get_userdata( $row['user'] );
@@ -341,7 +341,7 @@ class TP_Shortcodes {
                 $text = tp_translate_pub_type($row['type'], 'pl');
             }
             else if ( $key === 'author' ) {
-                $text = TP_Bibtex::parse_author($row['name'], '', $atts['author_name']);
+                $text = TP_Bibtex::parse_author($row['name'], '', $atts['author_name'], '', false);
             }
             else if ( $key === 'user' ) {
                 $user_info = get_userdata( $row['user'] );
@@ -829,7 +829,7 @@ function tp_cite_shortcode ($atts) {
     else {
         $publication = TP_Publications::get_publication($param['id'], ARRAY_A);
     }
-    
+
     // If the publication was not found
     if ( !$publication ) {
         if ( $param['key'] != '' ) {
@@ -960,7 +960,7 @@ function tp_single_shortcode ($atts) {
         $publication = TP_Publications::get_publication($param['id'], ARRAY_A);
     }
     $tp_single_publication = $publication;
-    
+
     // Return if there os no publication
     if ( !is_array($publication ) ) {
         return;
@@ -1021,7 +1021,7 @@ function tp_bibtex_shortcode ($atts) {
 
     $convert_bibtex = ( get_tp_option('convert_bibtex') == '1' ) ? true : false;
     $publication = TP_Shortcodes::set_publication($param, $tp_single_publication);
-    
+
     // Return if there os no publication
     if ( !is_array($publication ) ) {
         return;
@@ -1487,7 +1487,7 @@ function tp_publist_shortcode ($args) {
     // Parameters for returning publications
     $args = array(
         'tag'                       => $sql_parameter['tag'],
-        'tag_name'                  => $sql_parameter['tag_name'], 
+        'tag_name'                  => $sql_parameter['tag_name'],
         'year'                      => $sql_parameter['year'],
         'years_between'             => $sql_parameter['years_between'],
         'type'                      => $sql_parameter['type'],
@@ -1567,7 +1567,7 @@ function tp_publist_shortcode ($args) {
                         'user'               => $sql_parameter['user'],
                         'type'               => $sql_parameter['type'],
                         'order'              => 'DESC',
-                        'output_type'        => ARRAY_A 
+                        'output_type'        => ARRAY_A
                     ] );
 
         $part2 .= TP_Shortcodes::generate_pub_table(
@@ -1579,7 +1579,7 @@ function tp_publist_shortcode ($args) {
                             'years'                  => $row_year,
                             'colspan'                => $colspan,
                             'user'                   => $atts['user'],
-                            'sort_list'              => $settings['sort_list'] 
+                            'sort_list'              => $settings['sort_list']
                     ] );
         $part2 .= $menu;
     }

@@ -1,7 +1,7 @@
 <?php
 /**
  * This file contains all general functions of teachpress bibtex core
- * 
+ *
  * @package teachpress\core\bibtex
  * @license http://www.gnu.org/licenses/gpl-2.0.html GPLv2 or later
  * @since 2.0.0
@@ -144,7 +144,7 @@ class TP_Bibtex {
        "$\\varepsilon$"           => "ε",
        "$\\varphi$"               => "φ",
        "$\\varsigma$"             => "ς",
-                                               
+
         "\\AA"                   => "Å",
         "\\aa"                   => "å",
         "\\AE"                   => "Æ",
@@ -163,7 +163,7 @@ class TP_Bibtex {
         "\\TH"                   => "Þ",
         "\\th"                   => "þ",
         "\\ss"                   => "ß",
-                                               
+
         "\\#"                    => '#',
         "\\$"                    => '$',
         "\\%"                    => '%',
@@ -280,12 +280,12 @@ class TP_Bibtex {
         "\\H u"                  => "ű",
         "\\v Z"                  => "Ž",
         "\\v z"                  => "ž",
-   
+
         // later in the dict so that they don't match longer entries like "\\'\\i"
         "\\i"                    => "ı",
         "\\L"                    => "Ł",
         "\\l"                    => "ł",
-                                               
+
         // for custom latex packages like ngerman
         "\\glqq"                 => "„",
         "\\grqq"                 => "“",
@@ -302,7 +302,7 @@ class TP_Bibtex {
         "\\varphi"               => "φ",
         "\\varsigma"             => "ς",
                                                );
-    
+
     /**
      * Gets a single publication in bibtex format
      * @param array $row
@@ -316,7 +316,7 @@ class TP_Bibtex {
         $string = '';
         $pub_fields = ['type', 'bibtex', 'title', 'author', 'editor', 'url', 'doi', 'isbn', 'date', 'urldate', 'booktitle', 'issuetitle', 'journal', 'volume', 'number', 'issue', 'pages', 'publisher', 'address', 'edition', 'chapter', 'institution', 'organization', 'school', 'series', 'crossref', 'abstract', 'howpublished', 'key', 'techtype', 'note'];
         $isbn_label = ( $row['is_isbn'] == 1 ) ? 'isbn' : 'issn';
-        
+
         // initial string
         if ( $row['type'] === 'presentation' ) {
             $string = '@misc{' . stripslashes($row['bibtex']) . ','  . PHP_EOL;
@@ -324,17 +324,17 @@ class TP_Bibtex {
         else {
             $string = '@' . stripslashes($row['type']) . '{' . stripslashes($row['bibtex']) . ','  . PHP_EOL;
         }
-        
+
         // loop for all BibTeX fields
         for ( $i = 2; $i < count($pub_fields); $i++ ) {
             // go to the next if there is nothing
             if ( !isset( $row[$pub_fields[$i]] ) || $row[$pub_fields[$i]] == '' || $row[$pub_fields[$i]] == '0000-00-00'  ) {
                 continue;
             }
-            
+
             $field_name = $pub_fields[$i];
             $field_value = TP_HTML::convert_special_chars( stripslashes( $row[$pub_fields[$i]] ) );
-           
+
             // prepare the fields
             // ISBN | ISSN
             if ( $field_name === 'isbn' ) {
@@ -361,15 +361,15 @@ class TP_Bibtex {
             else {
                 $string .= TP_Bibtex::prepare_bibtex_line($field_value, $field_name);
             }
-            
+
         }
-        
+
         // Add month
         if ( $row['type'] == 'booklet' ) {
             $date = tp_datesplit( $row['date'] );
             $string .= 'month = {' . $date[0][1] . '},'  . PHP_EOL;
         }
-        
+
         // Add keywords
         if ( $all_tags != '' ) {
             $keywords = '';
@@ -381,19 +381,19 @@ class TP_Bibtex {
         else {
             $string .= 'keywords = {}';
         }
-        
+
         // Add private comment
         if ( $private_comment === true ) {
             $string .= ','  . PHP_EOL;
             $string .= 'annote = {' . TP_HTML::convert_special_chars( stripslashes($row['comment'])) . '}';
         }
-        
+
         // Add teachPress/biblatex extensions
         $string .= ','  . PHP_EOL;
         $string .= 'pubstate = {' . $row['status'] . '},'  . PHP_EOL;
         $string .= 'tppubtype = {' . $row['type'] . '}'  . PHP_EOL;
         $string .= '}' . PHP_EOL;
-        
+
         // Convert utf-8 chars
         if ( $convert_bibtex === true ) {
             $string = self::convert_utf8_to_bibtex($string);
@@ -414,45 +414,45 @@ class TP_Bibtex {
     public static function looks_like_bibtex ($input) {
         $lines = preg_split("/\r\n|\n|\r/", $input);
         $result = $lines !== false;
-        
+
         if ($result) {
             $lines = array_filter($lines, function ($l) {
                                   $l = trim($l);
                                   return strlen($l) > 0 && substr($l, 0, 1) != "%"; });
-            
+
             if ($result && count($lines) > 0) {
                 $first_char = substr(trim(reset($lines)), 0, 1);
                 $last_line = trim(end($lines));
                 $last_char = substr($last_line, strlen($last_line) - 1, 1);
-                
+
                 $result = $first_char == "@" && $last_char == "}";
             }
         }
-        
+
         return $result;
     }
-    
+
     /**
-     * Replaces some BibTeX special chars with the UTF-8 versions and secures the input. 
+     * Replaces some BibTeX special chars with the UTF-8 versions and secures the input.
      * Before teachPress 5.0, this function was called replace_bibtex_chars()
-     * 
+     *
      * @param string $input
      * @return string
      * @since 3.0.0
      * @access public
      */
     public static function convert_bibtex_to_utf8 ($input) {
-        
+
         // return the input if there are no bibtex chars
         if ( strpos( $input,'\\' ) === false && strpos($input,'{') === false ) { return $input; }
-        
+
         // Step 1: Chars which are based on a combination of chars, with escapes
         $input = str_replace( array_keys(TP_Bibtex::$bibtex_char_mapping), array_values(TP_Bibtex::$bibtex_char_mapping), $input);
-        
+
         // Step 1b: Remove backslash
         $input = str_replace( '\\', '', $input );
 
-        // Step 2: All other special chars 
+        // Step 2: All other special chars
         $array_1 = array('"{a}','"{A}','`{a}','`{A}',"'{a}","'{A}",'~{a}','~{A}','={a}','={A}','^{a}','^{A}','u{a}','u{A}','k{a}','k{A}','r{a}','r{A}','{aa}','{AA}',
                          '.{b}','.{B}',
                          "'{c}","'{C}",'v{c}','v{C}','c{c}','c{C}','.{c}','.{C}','^{c}','^{C}',
@@ -504,7 +504,7 @@ class TP_Bibtex {
         $return = str_replace($array_1, $array_2, $input);
         return htmlspecialchars($return, ENT_NOQUOTES);
     }
-    
+
     /**
      * Cleans the author names after bibtex to UTF-8 conversion
      * @param string $input
@@ -525,7 +525,7 @@ class TP_Bibtex {
         $ret = str_replace($array_a, $array_b, $input);
         return $ret;
     }
-    
+
     /**
      * Replaces some UTF-8 chars with their BibTeX/LaTeX expression.
      * @param string $input
@@ -558,7 +558,7 @@ class TP_Bibtex {
                          'ÿ','Ÿ','ý','Ý','ŷ','Ŷ',
                          'ź','Ź','ž','Ž','ż','Ż',
                          'ß','&','Ø','ø','Ł','ł','Æ','æ','Œ','œ','o͡o','–','—');
-        
+
         $array_b = array('\"{a}', '\"{A}', '\`{a}', '\`{A}', "\'{a}", "\'{A}", '\^{a}', '\^{A}', '\~{a}', '\~{A}', '\k{a}', '\k{A}', '\={a}', '\={A}', '\u{a}', '\u{A}', 'r{a}', 'r{A}',
                          '\.{b}', '\.{B}',
                          "\'{c}", "\'{C}", '\v{c}', '\v{C}', '\c{c}', '\c{C}', '\.{c}', '\.{C}', '\^{c}', '\^{C}',
@@ -588,7 +588,7 @@ class TP_Bibtex {
         $return = str_replace( $array_a , $array_b ,$input);
         return $return;
     }
-    
+
     /**
      * Prepares a (html) input for bibtex and replace expressions for bold, italic, lists, etc. with their latex equivalents
      * @param string $text          The (html) input
@@ -600,11 +600,11 @@ class TP_Bibtex {
         if ( $text == '' ) {
             return '';
         }
-        
+
         $text = TP_HTML::prepare_title($text);
         // Replace expressions
         $search = array ('/<sub>/i', '/<sup>/i',
-                         '/<i>/i', '/<b>/i', '/<em>/i', '/<u>/i', 
+                         '/<i>/i', '/<b>/i', '/<em>/i', '/<u>/i',
                          '/<\/(sub|sup|i|b|em|u)>/i',
                          '/<(s|small|del)>/i',
                          '/<\/(s|small|del)>/i',
@@ -612,7 +612,7 @@ class TP_Bibtex {
                          '/<ol>/i', '/<\/ol>/i',
                          '/<li>/i', '/<\/li>/i');
         $replace = array ('_{', '^{',
-                          '\textit{', '\textbf{', '\emph{', '\underline{', 
+                          '\textit{', '\textbf{', '\emph{', '\underline{',
                           '}',
                           '',
                           '',
@@ -636,8 +636,8 @@ class TP_Bibtex {
         }
         return '';
     }
-    
-    
+
+
 
     /**
      * Prepares a single BibTeX line with the input from onde publication field
@@ -654,27 +654,27 @@ class TP_Bibtex {
         }
         return '';
     }
-    
-    /** 
-     * Explodes an url string into array 
-     * @param string $url_string 
-     * @return array 
-     * @since 4.3.5 
-    */ 
-    public static function explode_url ($url_string) { 
-        $all_urls = explode(chr(13) . chr(10), $url_string); 
-        $end = array(); 
-        foreach ($all_urls as $url) { 
-            $parts = explode(', ',$url); 
-            $parts[0] = trim( $parts[0] ); 
-            if ( !isset($parts[1]) ) { 
-                $parts[1] = $parts[0]; 
-            } 
-            $end[] = $parts; 
-        } 
-        return $end; 
-    } 
-    
+
+    /**
+     * Explodes an url string into array
+     * @param string $url_string
+     * @return array
+     * @since 4.3.5
+    */
+    public static function explode_url ($url_string) {
+        $all_urls = explode(chr(13) . chr(10), $url_string);
+        $end = array();
+        foreach ($all_urls as $url) {
+            $parts = explode(', ',$url);
+            $parts[0] = trim( $parts[0] );
+            if ( !isset($parts[1]) ) {
+                $parts[1] = $parts[0];
+            }
+            $end[] = $parts;
+        }
+        return $end;
+    }
+
     /**
      * The function splits a author/editor name and returns the lastname or NULL if there is no name was found
      * @param string $input     A name of an author or editor
@@ -696,32 +696,73 @@ class TP_Bibtex {
      * @param string $separator     The separator between the authors (for the output)
      * @param string $mode          values: last, initials, old, short
      * @param string $punctuation   Punctuation after an initial (only used for short mode)
+     * @param bool $show_annotations Show trailing author markers in output (e.g. *, dagger)
      * @return string
      * @since 3.0.0
     */
-    public static function parse_author ($input, $separator, $mode = '', $punctuation = '') {
+    public static function parse_author ($input, $separator, $mode = '', $punctuation = '', $show_annotations = true) {
+        $author_data = self::extract_author_annotations($input);
+        $input = $author_data['clean_input'];
+        $annotations = ( $show_annotations === true ) ? $author_data['annotations'] : array();
+
         if ( $mode === 'last' || $mode === 'initials' ) {
-            $all_authors = self::parse_author_default($input, $separator, $mode);
+            $all_authors = self::parse_author_default($input, $separator, $mode, $annotations);
         }
         elseif ( $mode === 'short' ) {
-            $all_authors = self::parse_author_short($input, $separator, $punctuation);
+            $all_authors = self::parse_author_short($input, $separator, $punctuation, $annotations);
         }
         elseif ( $mode === 'old' ) {
-            $all_authors = self::parse_author_deprecated($input, $separator);
+            $all_authors = self::parse_author_deprecated($input, $separator, $annotations);
         }
         else {
-            $all_authors = self::parse_author_simple($input, $separator);
+            $all_authors = self::parse_author_simple($input, $separator, $annotations);
         }
         return $all_authors;
     }
-    
+
+    /**
+     * Extracts trailing annotation markers from each author token and returns a clean author string.
+     *
+     * Example:
+     * "Alice Smith* and Bob Miller" ->
+     * clean_input: "Alice Smith and Bob Miller"
+     * annotations: ['*', '']
+     *
+     * @param string $input
+     * @return array{clean_input: string, annotations: array}
+     * @since 9.2.0
+     */
+    private static function extract_author_annotations($input) {
+        $tokens = explode(' and ', $input);
+        $clean_tokens = array();
+        $annotations = array();
+
+        foreach ( $tokens as $token ) {
+            $token = trim($token);
+            $annotation = '';
+
+            if ( preg_match('/\s*([*\x{2020}\x{2021}]+)\s*$/u', $token, $match) ) {
+                $annotation = $match[1];
+                $token = preg_replace('/\s*([*\x{2020}\x{2021}]+)\s*$/u', '', $token);
+            }
+
+            $clean_tokens[] = trim($token);
+            $annotations[] = $annotation;
+        }
+
+        return array(
+            'clean_input' => implode(' and ', $clean_tokens),
+            'annotations' => $annotations,
+        );
+    }
+
     /**
      * This is the default parsing function for author names
-     * 
+     *
      * Some examples for the parsing:
      * last:        Adolf F. Weinhold and Ludwig van Beethoven --> Weinhold, Adolf; van Beethoven, Ludwig
      * initials:    Adolf F. Weinhold and Ludwig van Beethoven --> Weinhold, Adolf F; van Beethoven, Ludwig
-     * 
+     *
      * @param string $input     The input string
      * @param string $separator The separator between the authors (for the output)
      * @param string $mode      last o initials
@@ -730,7 +771,7 @@ class TP_Bibtex {
      * @access public
      * @uses BIBTEXCREATORPARSE()    This class is a part of bibtexParse
      */
-    public static function parse_author_default ($input, $separator = ';', $mode = 'initials') {
+    public static function parse_author_default ($input, $separator = ';', $mode = 'initials', $annotations = array()) {
         $creator = new BIBTEXCREATORPARSE();
         $creator->separateInitials = false;
         $creatorArray = $creator->parse($input);
@@ -738,9 +779,9 @@ class TP_Bibtex {
         $max = count($creatorArray);
         for ( $i = 0; $i < $max; $i++ ) {
             $one_author = '';
-            /* 
+            /*
              * Set the author name together with the parsing result of bibtexParse
-             * 
+             *
              * $creatorArray[][0] => firstname
              * $creatorArray[][1] => initials
              * $creatorArray[][2] => surname
@@ -751,10 +792,14 @@ class TP_Bibtex {
             if ($creatorArray[$i][3] != '') { $one_author = trim($creatorArray[$i][3]);}
             if ($creatorArray[$i][2] != '') { $one_author .= ' ' .trim($creatorArray[$i][2]) . ',';}
             if ($creatorArray[$i][0] != '') { $one_author .= ' ' .trim($creatorArray[$i][0]);}
-            if ( $mode == 'initials' && $creatorArray[$i][1] != '' ) { 
+            if ( $mode == 'initials' && $creatorArray[$i][1] != '' ) {
                 $one_author .= ' ' .trim($creatorArray[$i][1]);
             }
-            
+
+            if ( isset($annotations[$i]) && $annotations[$i] !== '' ) {
+                $one_author .= $annotations[$i];
+            }
+
             // Add author to the main result
             $all_authors .= stripslashes($one_author);
             if ( $i < count($creatorArray) -1 ) {
@@ -763,31 +808,31 @@ class TP_Bibtex {
         }
         return $all_authors;
     }
-    
+
     /**
      * Parse author names to the short style
-     * 
-     * Example: 
+     *
+     * Example:
      * Adolf F. Weinhold and Ludwig van Beethoven --> Weinhold, A F; van Beethoven, L
-     * 
+     *
      * @param string $input         The input string
      * @param string $separator     The separator between the authors (for the output)
-     * @param string $punctuation   The optional punctuation after an initial 
+     * @param string $punctuation   The optional punctuation after an initial
      * @return string
      * @since 8.0.0
      * @access public
      * @uses BIBTEXCREATORPARSE()   This class is a part of bibtexParse
      */
-    public static function parse_author_short($input, $separator = ';', $punctuation = '') {
+    public static function parse_author_short($input, $separator = ';', $punctuation = '', $annotations = array()) {
         $all_authors = '';
         $creator = new BIBTEXCREATORPARSE();
         $creatorArray = $creator->parse($input);
         $max = count($creatorArray);
         for ( $i = 0; $i < $max; $i++ ) {
             $one_author = '';
-            /* 
+            /*
              * Set the author name together with the parsing result of bibtexParse
-             * 
+             *
              * $creatorArray[][0] => firstname
              * $creatorArray[][1] => initials
              * $creatorArray[][2] => surname
@@ -798,7 +843,11 @@ class TP_Bibtex {
             if ($creatorArray[$i][2] != '') { $one_author .= ' ' .trim($creatorArray[$i][2]) . '';}
             $initials = $creator->getInitials($creatorArray[$i][0], $punctuation);
             $one_author .= ' ' . trim($initials);
-            
+
+            if ( isset($annotations[$i]) && $annotations[$i] !== '' ) {
+                $one_author .= $annotations[$i];
+            }
+
             // Add author to the main result
             $all_authors .= stripslashes($one_author);
             if ( $i < count($creatorArray) -1 ) {
@@ -807,20 +856,20 @@ class TP_Bibtex {
         }
         return $all_authors;
     }
-    
+
     /**
      * This is the original (deprecated) parsing function for author names
-     * 
+     *
      * Some examples for the parsing:
      * Adolf F. Weinhold and Ludwig van Beethoven --> Weinhold, Adolf F.; van Beethoven, Ludwig
-     * 
+     *
      * @param string $input     The input string
      * @param string $separator The separator between the authors (for the output)
      * @return string
      * @since 5.0.0
      * @access public
      */
-    public static function parse_author_deprecated ($input, $separator = ';') {
+    public static function parse_author_deprecated ($input, $separator = ';', $annotations = array()) {
         $all_authors = '';
         $one_author = '';
         $array = explode(" and ",$input);
@@ -833,6 +882,11 @@ class TP_Bibtex {
                 $one_author .= ' ' . trim( $names[$j] );
             }
             $one_author = trim( $names[$lenth2 - 1] ). ', ' . $one_author;
+
+            if ( isset($annotations[$i]) && $annotations[$i] !== '' ) {
+                $one_author .= $annotations[$i];
+            }
+
             $all_authors = $all_authors . $one_author;
             if ( $i < $lenth - 1 ) {
                 $all_authors .= $separator . ' ';
@@ -841,28 +895,42 @@ class TP_Bibtex {
         }
         return $all_authors;
     }
-    
+
     /**
      * This is the simple parsing function which just replaces the "and" with ","
-     * 
+     *
      * Some examples for the parsing:
      * Adolf F. Weinhold and Albert Einstein --> Adolf F. Weinhold, Albert Einstein
-     * 
+     *
      * @param string $input     The input string
      * @param string $separator The separator between the authors (for the output)
      * @return string
      * @since 5.0.0
      * @acces public
      */
-    public static function parse_author_simple ($input, $separator = ',') {
-        $all_authors = str_replace( array(' and ', '{', '}'), array($separator . ' ', '', ''), $input );
+    public static function parse_author_simple ($input, $separator = ',', $annotations = array()) {
+        $parts = explode(' and ', $input);
+        $all_authors = '';
+        $max = count($parts);
+
+        for ( $i = 0; $i < $max; $i++ ) {
+            $one_author = str_replace(array('{', '}'), array('', ''), trim($parts[$i]));
+            if ( isset($annotations[$i]) && $annotations[$i] !== '' ) {
+                $one_author .= $annotations[$i];
+            }
+            $all_authors .= $one_author;
+            if ( $i < $max - 1 ) {
+                $all_authors .= $separator . ' ';
+            }
+        }
+
         return stripslashes($all_authors);
     }
 
     /**
      * Checks if a string is encoded with UTF-8 or not
      * from http://floern.com/webscripting/is-utf8-auf-utf-8-prüfen
-     * 
+     *
      * @param string $string
      * @return boolean
      * @since 4.2.0
@@ -871,13 +939,13 @@ class TP_Bibtex {
         $strlen = strlen($string);
         for( $i = 0; $i < $strlen; $i++ ) {
             $ord = ord($string[$i]);
-            if( $ord < 0x80 ) { 
+            if( $ord < 0x80 ) {
                 continue;
             }
-            elseif( ($ord&0xE0) === 0xC0 && $ord > 0xC1 ) { 
+            elseif( ($ord&0xE0) === 0xC0 && $ord > 0xC1 ) {
                 $n = 1;
-            } 
-            elseif( ($ord&0xF0) === 0xE0 ) { 
+            }
+            elseif( ($ord&0xF0) === 0xE0 ) {
                 $n = 2;
             }
             elseif( ($ord&0xF8) === 0xF0 && $ord < 0xF5 ) {
@@ -885,7 +953,7 @@ class TP_Bibtex {
             }
             else {
                 return false;
-            } 
+            }
             for($c = 0; $c < $n; $c++) {
                 if( ++$i === $strlen || ( ord($string[$i])&0xC0 ) !== 0x80 ) {
                     return false;

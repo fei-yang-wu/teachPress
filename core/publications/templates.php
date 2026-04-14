@@ -403,6 +403,12 @@ class TP_Publication_Template_API {
  */
 class TP_HTML_Publication_Template {
 
+    /**
+     * In-request cache for publication meta values used by template rendering.
+     * @var array
+     */
+    private static $publication_meta_cache = array();
+
     public static function load_settings($template) {
         // default values
         $settings = array(
@@ -467,6 +473,7 @@ class TP_HTML_Publication_Template {
         else {
             $all_authors = TP_Bibtex::parse_author($row['author'], $settings['author_separator'], $settings['author_name'] );
         }
+        $all_authors .= self::get_author_annotation_suffix($row, $all_authors);
 
         // if the publication has a doi -> altmetric
         if ( TEACHPRESS_ALTMETRIC_SUPPORT === true && $settings['show_altmetric_entry']  &&  $row['doi'] != '' ) {
@@ -549,6 +556,59 @@ class TP_HTML_Publication_Template {
         // load entry template
         $s = $template->get_entry($interface);
         return $s;
+    }
+
+    /**
+     * Returns a publication meta value with an in-request cache.
+     * @param int $pub_id
+     * @param string $meta_key
+     * @return string
+     */
+    private static function get_publication_meta_value($pub_id, $meta_key) {
+        $cache_key = $pub_id . '::' . $meta_key;
+        if ( array_key_exists($cache_key, self::$publication_meta_cache) ) {
+            return self::$publication_meta_cache[$cache_key];
+        }
+
+        $meta = TP_Publications::get_pub_meta($pub_id, $meta_key);
+        $value = ( isset($meta[0]) && isset($meta[0]['meta_value']) ) ? $meta[0]['meta_value'] : '';
+        self::$publication_meta_cache[$cache_key] = $value;
+
+        return $value;
+    }
+
+    /**
+     * Builds the suffix for author annotation legends, e.g. "(*Equally contributed)".
+     *
+     * The legend is only shown if
+     * - a marker and message are configured in publication meta, and
+     * - the marker is present in the rendered author list.
+     *
+     * @param array $row
+     * @param string $all_authors
+     * @return string
+     */
+    private static function get_author_annotation_suffix($row, $all_authors) {
+        if ( !isset($row['pub_id']) ) {
+            return '';
+        }
+
+        $pub_id = intval($row['pub_id']);
+        if ( $pub_id === 0 ) {
+            return '';
+        }
+
+        $marker = self::get_publication_meta_value($pub_id, 'tp_author_annotation_marker');
+        $message = self::get_publication_meta_value($pub_id, 'tp_author_annotation_message');
+
+        if ( $marker === '' || $message === '' ) {
+            return '';
+        }
+        if ( strpos($all_authors, $marker) === false ) {
+            return '';
+        }
+
+        return ' <span class="tp_pub_author_annotation">' . esc_html('(' . $marker . ltrim($message) . ')') . '</span>';
     }
 
     /**
