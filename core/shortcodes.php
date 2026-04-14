@@ -829,6 +829,17 @@ function tp_cite_shortcode ($atts) {
     else {
         $publication = TP_Publications::get_publication($param['id'], ARRAY_A);
     }
+    
+    // If the publication was not found
+    if ( !$publication ) {
+        if ( $param['key'] != '' ) {
+            $input = esc_html($param['key']);
+        }
+        else {
+            $input = 'pub_ID ' . esc_html($param['id']);
+        }
+        return '<sup>[' . $input . ' ' . esc_html__('Not found','teachpress') . ']</sup>';
+    }
 
     // Add ref to cite object
     $index = $tp_cite_object->add_ref($publication);
@@ -866,8 +877,8 @@ function tp_ref_shortcode($atts) {
 
     // define settings
     $settings = array(
-       'author_name'        => htmlspecialchars($param['author_name']),
-       'editor_name'        => htmlspecialchars($param['editor_name']),
+       'author_name'        => tp_sanitize_key($param['author_name']),
+       'editor_name'        => tp_sanitize_key($param['editor_name']),
        'author_separator'   => htmlspecialchars($param['author_separator']),
        'editor_separator'   => htmlspecialchars($param['editor_separator']),
        'date_format'        => htmlspecialchars($param['date_format']),
@@ -931,8 +942,8 @@ function tp_single_shortcode ($atts) {
     ], $atts);
 
     $settings = [
-       'author_name'        => htmlspecialchars($param['author_name']),
-       'editor_name'        => htmlspecialchars($param['editor_name']),
+       'author_name'        => tp_sanitize_key($param['author_name']),
+       'editor_name'        => tp_sanitize_key($param['editor_name']),
        'author_separator'   => htmlspecialchars($param['author_separator']),
        'editor_separator'   => htmlspecialchars($param['editor_separator']),
        'date_format'        => htmlspecialchars($param['date_format']),
@@ -1088,7 +1099,7 @@ function tp_links_shortcode ($atts) {
  *      $tsr (STRING)           Full text search
  *
  *
- * @param array $atts {
+ * @param array $args {
  *      @type string user                  the WordPress IDs or login names of on or more users (separated by commas)
  *      @type string tag                   tag IDs (separated by comma)
  *      @type string type                  the publication types you want to show (separated by comma)
@@ -1129,13 +1140,18 @@ function tp_links_shortcode ($atts) {
  *      @type int show_search_filter       0 (false) or 1 (true), default: 1
  *      @type int show_year_filter         0 (false) or 1 (true), default: 1
  *      @type int show_bibtex              Show bibtex container under each entry (1) or not (0), default: 1
+ *      @type int show_abstract            Show bibtex container under each entry (1) or not (0), default: 1
  *      @type int show_comment             Show comment as a container, default: 0
  *      @type string comment_text          Sets the text used for the comment link, if shown. Default: 'Comment'
  *      @type string comment_tooltip       Set the tooltip text for the comment link, if shown. Default: 'Show comment'
  *      @type string container_suffix      a suffix which can optionally set to modify container IDs in publication lists. It's not set by default.
  *      @type string filter_class          The CSS class for filter/select menus, default: default
  *      @type int show_altmetric_donut     0 (false) or 1 (true), default: 0
- *      @type int show_altmetric_entrx     0 (false) or 1 (true), default: 0
+ *      @type int show_altmetric_entry     0 (false) or 1 (true), default: 0
+ *      @type string show_altmetric_type   Altmetric badge type. Accepted values: 'donut', 'medium-donut',
+ *                                         'large-donut', 'bar', 'medium-bar', 'large-bar', '1', '4'.
+ *                                         Defaults to 'donut' when empty. Default: ''
+ *                                         See: https://badge-docs.altmetric.com/customizations.html#badge-types
  *      @type int show_dimensions_badge    0 (false) or 1 (true), default: 0
  *      @type int show_plumx_widget        0 (false) or 1 (true), default: 0
  *      @type int use_jumpmenu             Use filter as jumpmenu (1) or not (0), default: 1
@@ -1189,6 +1205,7 @@ function tp_publist_shortcode ($args) {
         'show_search_filter'    => 1,
         'show_year_filter'      => 1,
         'show_bibtex'           => 1,
+        'show_abstract'         => 1,
         'show_comment'          => 0,
         'comment_text'          => '',
         'comment_tooltip'       => '',
@@ -1198,6 +1215,10 @@ function tp_publist_shortcode ($args) {
         'custom_filter_label'   => '',
         'show_altmetric_donut'  => 0,
         'show_altmetric_entry'  => 0,
+        // Altmetric badge type. Accepted values: 'donut', 'medium-donut', 'large-donut',
+        // 'bar', 'medium-bar', 'large-bar'. Defaults to 'donut' when empty.
+        // See: https://badge-docs.altmetric.com/customizations.html#badge-types
+        'show_altmetric_type'   => '',
         'show_dimensions_badge' => 0,
         'show_plumx_widget'     => 0,
         'use_jumpmenu'          => 1,
@@ -1205,46 +1226,48 @@ function tp_publist_shortcode ($args) {
     ), $args);
 
     $settings = array(
-        'author_name'           => htmlspecialchars($atts['author_name']),
-        'editor_name'           => htmlspecialchars($atts['editor_name']),
+        'author_name'           => tp_sanitize_key($atts['author_name']),
+        'editor_name'           => tp_sanitize_key($atts['editor_name']),
         'author_separator'      => htmlspecialchars($atts['author_separator']),
         'editor_separator'      => htmlspecialchars($atts['editor_separator']),
         'headline'              => intval($atts['headline']),
-        'style'                 => htmlspecialchars($atts['style']),
+        'style'                 => tp_sanitize_key($atts['style']),
         'template'              => htmlspecialchars($atts['template']),
-        'image'                 => htmlspecialchars($atts['image']),
-        'image_link'            => htmlspecialchars($atts['image_link']),
-        'link_style'            => htmlspecialchars($atts['link_style']),
-        'title_ref'             => htmlspecialchars($atts['title_ref']),
-        'html_anchor'           => ( $atts['anchor'] == '1' ) ? '#tppubs' . htmlspecialchars($atts['container_suffix']) : '',
+        'image'                 => tp_sanitize_key($atts['image']),
+        'image_link'            => tp_sanitize_key($atts['image_link']),
+        'link_style'            => tp_sanitize_key($atts['link_style']),
+        'title_ref'             => tp_sanitize_key($atts['title_ref']),
+        'html_anchor'           => ( $atts['anchor'] == '1' ) ? '#tppubs' . tp_sanitize_key($atts['container_suffix']) : '',
         'date_format'           => htmlspecialchars($atts['date_format']),
         'permalink'             => ( get_option('permalink_structure') ) ? get_permalink() . "?" : get_permalink() . "&amp;",
         'convert_bibtex'        => ( get_tp_option('convert_bibtex') == '1' ) ? true : false,
         'pagination'            => intval($atts['pagination']),
         'entries_per_page'      => intval($atts['entries_per_page']),
-        'sort_list'             => htmlspecialchars($atts['sort_list']),
+        'sort_list'             => tp_sanitize_key($atts['sort_list']),
         'show_author_filter'    => ( $atts['show_author_filter'] == '1' ) ? true : false,
         'show_type_filter'      => ( $atts['show_type_filter'] == '1' ) ? true : false,
         'show_user_filter'      => ( $atts['show_user_filter'] == '1' ) ? true : false,
         'show_year_filter'      => ( $atts['show_year_filter'] == '1' ) ? true : false,
         'show_search_filter'    => ( $atts['show_search_filter'] == '1' ) ? true : false,
         'show_bibtex'           => ( $atts['show_bibtex'] == '1' ) ? true : false,
+        'show_abstract'         => ( $atts['show_abstract'] == '1') ? true : false,
         'show_comment'          => ( $atts['show_comment'] == '1') ? true : false,
         'comment_text'          => htmlspecialchars($atts['comment_text']),
         'comment_tooltip'       => htmlspecialchars($atts['comment_tooltip']),
-        'show_tags_as'          => htmlspecialchars($atts['show_tags_as']),
+        'show_tags_as'          => tp_sanitize_key($atts['show_tags_as']),
         'tag_limit'             => intval($atts['tag_limit']),
         'hide_tags'             => htmlspecialchars($atts['hide_tags']),
         'maxsize'               => intval($atts['maxsize']),
         'minsize'               => intval($atts['minsize']),
-        'container_suffix'      => htmlspecialchars($atts['container_suffix']),
+        'container_suffix'      => tp_sanitize_key($atts['container_suffix']),
         'filter_class'          => htmlspecialchars($atts['filter_class']),
         'custom_filter'         => htmlspecialchars($atts['custom_filter']),
         'custom_filter_label'   => htmlspecialchars($atts['custom_filter_label']),
-        'show_altmetric_entry'  => ($atts['show_altmetric_entry'] == '1') ? true : false,
-        'show_altmetric_donut'  => ($atts['show_altmetric_donut'] == '1') ? true : false,
-        'show_dimensions_badge' => ('1' === $atts['show_dimensions_badge']) ? true : false,
-        'show_plumx_widget'     => ('1' === $atts['show_plumx_widget']) ? true : false,
+        'show_altmetric_entry'  => ( $atts['show_altmetric_entry'] == '1') ? true : false,
+        'show_altmetric_donut'  => ( $atts['show_altmetric_donut'] == '1') ? true : false,
+        'show_altmetric_type'   => tp_sanitize_key( $atts['show_altmetric_type'] ),
+        'show_dimensions_badge' => ( $atts['show_dimensions_badge'] == '1') ? true : false,
+        'show_plumx_widget'     => ( $atts['show_plumx_widget'] == '1') ? true : false,
         'use_jumpmenu'          => ( $atts['use_jumpmenu'] == '1' ) ? true : false
     );
 
@@ -1403,7 +1426,7 @@ function tp_publist_shortcode ($args) {
     $part1 = '';
 
     // anchor
-    $part1 .= '<a name="tppubs" id="tppubs"' . $settings['container_suffix'] . '></a>';
+    $part1 .= '<a name="tppubs" id="tppubs' . $settings['container_suffix'] . '"></a>';
 
     // tag cloud
     if ( $tag_cloud !== '' ) {
@@ -1525,37 +1548,39 @@ function tp_publist_shortcode ($args) {
         // Define page menu
         $menu = '';
         if ( $settings['pagination'] === 1 ) {
-            $menu = tp_page_menu(
-                        array( 'number_entries'     => $number_entries,
-                               'entries_per_page'   => $settings['entries_per_page'],
-                               'current_page'       => $pagination_limits['current_page'],
-                               'entry_limit'        => $pagination_limits['entry_limit'],
-                               'page_link'          => $settings['permalink'],
-                               'link_attributes'    => $link_attributes,
-                               'mode'               => 'bottom',
-                               'before'             => '<div class="tablenav">',
-                               'after'              => '</div>')
-                    );
+            $menu = tp_page_menu( [
+                        'number_entries'     => $number_entries,
+                        'entries_per_page'   => $settings['entries_per_page'],
+                        'current_page'       => $pagination_limits['current_page'],
+                        'entry_limit'        => $pagination_limits['entry_limit'],
+                        'page_link'          => $settings['permalink'],
+                        'link_attributes'    => $link_attributes,
+                        'mode'               => 'bottom',
+                        'before'             => '<div class="tablenav">',
+                        'after'              => '</div>'
+                    ] );
         }
 
 
         $part2 .= $menu;
-        $row_year = TP_Publications::get_years(
-                        array( 'user'               => $sql_parameter['user'],
-                               'type'               => $sql_parameter['type'],
-                               'order'              => 'DESC',
-                               'output_type'        => ARRAY_A ) );
+        $row_year = TP_Publications::get_years( [
+                        'user'               => $sql_parameter['user'],
+                        'type'               => $sql_parameter['type'],
+                        'order'              => 'DESC',
+                        'output_type'        => ARRAY_A 
+                    ] );
 
         $part2 .= TP_Shortcodes::generate_pub_table(
                         $tparray,
                         $template,
-                        array( 'id'                     => '',
-                               'number_publications'    => $tpz,
-                               'headline'               => $settings['headline'],
-                               'years'                  => $row_year,
-                               'colspan'                => $colspan,
-                               'user'                   => $atts['user'],
-                               'sort_list'              => $settings['sort_list'] ) );
+                        [   'id'                     => '',
+                            'number_publications'    => $tpz,
+                            'headline'               => $settings['headline'],
+                            'years'                  => $row_year,
+                            'colspan'                => $colspan,
+                            'user'                   => $atts['user'],
+                            'sort_list'              => $settings['sort_list'] 
+                    ] );
         $part2 .= $menu;
     }
     // If there are no publications founded
@@ -1632,12 +1657,17 @@ function tp_cloud_shortcode($atts) {
         'show_search_filter'        => 0,
         'show_year_filter'          => 1,
         'show_bibtex'               => 1,
+        'show_abstract'             => 1,
         'show_comment'              => 0,
         'comment_text'              => '',
         'comment_tooltip'           => '',
         'container_suffix'          => '',
-        'show_altmetric_donut'      => 0,
+        'show_altmetric_donut'      => 0, // deprecated
         'show_altmetric_entry'      => 0,
+        // Altmetric badge type. Accepted values: 'donut', 'medium-donut', 'large-donut',
+        // 'bar', 'medium-bar', 'large-bar'. Defaults to 'donut' when empty.
+        // See: https://badge-docs.altmetric.com/customizations.html#badge-types
+        'show_altmetric_type'       => '',
         'show_dimensions_badge'     => 0,
         'show_plumx_widget'         => 0,
         'use_jumpmenu'              => 1,
@@ -1693,6 +1723,7 @@ function tp_list_shortcode($atts){
        'entries_per_page'           => 50,
        'sort_list'                  => '',
        'show_bibtex'                => 1,
+       'show_abstract'              => 1,
        'show_comment'               => 0,
        'comment_text'               => '',
        'comment_tooltip'            => '',
@@ -1704,8 +1735,12 @@ function tp_list_shortcode($atts){
        'show_year_filter'           => 0,
        'show_tags_as'               => 'none',
        'container_suffix'           => '',
-       'show_altmetric_donut'       => 0,
+       'show_altmetric_donut'       => 0, // deprecated
        'show_altmetric_entry'       => 0,
+       // Altmetric badge type. Accepted values: 'donut', 'medium-donut', 'large-donut',
+       // 'bar', 'medium-bar', 'large-bar'. Defaults to 'donut' when empty.
+       // See: https://badge-docs.altmetric.com/customizations.html#badge-types
+       'show_altmetric_type'        => '',
        'show_dimensions_badge'      => 0,
        'show_plumx_widget'          => 0,
        'use_jumpmenu'               => 1,
@@ -1758,6 +1793,7 @@ function tp_search_shortcode ($atts) {
        'entries_per_page'           => 20,
        'sort_list'                  => '',
        'show_bibtex'                => 1,
+       'show_abstract'              => 1,
        'show_comment'               => 0,
        'comment_text'               => '',
        'comment_tooltip'            => '',
@@ -1769,8 +1805,12 @@ function tp_search_shortcode ($atts) {
        'show_search_filter'         => 1,
        'show_year_filter'           => 0,
        'container_suffix'           => '',
-       'show_altmetric_donut'       => 0,
+       'show_altmetric_donut'       => 0, // deprecated
        'show_altmetric_entry'       => 0,
+        // Altmetric badge type. Accepted values: 'donut', 'medium-donut', 'large-donut',
+        // 'bar', 'medium-bar', 'large-bar'. Defaults to 'donut' when empty.
+        // See: https://badge-docs.altmetric.com/customizations.html#badge-types
+        'show_altmetric_type'       => '',
        'show_dimensions_badge'      => 0,
        'show_plumx_widget'          => 0,
        'use_jumpmenu'               => 0,

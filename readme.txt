@@ -4,9 +4,9 @@ Tags: publications, bibliography, BibTeX
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.9
-Tested up to: 6.7.2
-Requires PHP: 7.0
-Stable tag: 9.0.12
+Tested up to: 6.9.4
+Requires PHP: 7.4
+Stable tag: 9.0.13
 
 Manage your publications with teachPress 
 
@@ -68,7 +68,7 @@ An example: [tplist image="left" image_size="70"]. Important: You must specify b
 
 == Credits ==
 
-Copyright 2008-2025 by Michael Winkler
+Copyright 2008-2026 by Michael Winkler
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -124,7 +124,15 @@ Please note the [teachPress 6.0 Upgrade Information](https://mtrv.wordpress.com/
 
 == Changelog ==
 
-= 9.0.12 =
+= 9.0.13 (11.04.2026) =
+* New: [tpcloud, tplist, tpsearch]: New parameter "show_abstract" (#277)
+* New: [tpcloud, tplist, tpsearch]: New parameter "show_altmetric_type" Available badge types: donut, medium-donut, large-donut, bar, medium-bar, large-bar (#107) (Thanks to epikentros)
+* Changed: [tpcloud, tplist, tpsearch]: Parameter "show_altmetric_donut" is deprecated
+* Bugfix: [tpcite]: Better handling of not existing cite references
+* Bugfix: Fix for CVE-2026-22353 (#279)
+* Bugfix: Fix for CVE-2026-22483
+
+= 9.0.12 (07.04.2025) =
 * Bugfix: Fix an authenticated (Contributor) SQL Injection issue
 
 = 9.0.11 (22.03.2025) =
@@ -133,7 +141,7 @@ Please note the [teachPress 6.0 Upgrade Information](https://mtrv.wordpress.com/
 = 9.0.10 (20.03.2025) =
 * Bugfix: Fixes another CSRF vulnerability in tp import dialog (CVE-2025-1320) (Thanks to Krzysztof Zając for reporting)
 
-= 9.0.9 (11.03.2025)
+= 9.0.9 (11.03.2025) =
 * Bugfix: Fix space handling in bibtex keys within publication exists check (#267)
 * Bugfix: Unknown column 'r.name' in 'where clause' error in function TP:Authors::get_authors() (#262)
 

@@ -296,6 +296,16 @@ function tp_get_memory_usage () {
 }
 
 /**
+ * Sanitizes a key name or a comma separated list of key names. Allowed chars: a-z A-Z 0-9 _ - , 
+ * @param string $tag_name
+ * @since 9.0.13
+ */
+function tp_sanitize_key ($tag_name) {
+   $safe_tag = strtolower( preg_replace( '/[^a-zA-Z0-9_,\-]/', '', $tag_name ) );
+   return $safe_tag;
+}
+
+/**
  * Converts a file size in bytes into kB, MB or GB
  * @param int $bytes
  * @return string

@@ -352,8 +352,16 @@ class TP_Publication_Template_API {
         $container_id = $this->data['container_id'];
 
         // div altmetric
-        if ( $settings['show_altmetric_entry']  && $row['doi'] != '' ) {
-            $content .= TP_HTML_Publication_Template::get_info_container( TP_HTML_Publication_Template::prepare_altmetric($row['doi']), 'altmetric', $container_id );
+        // Render the Altmetric badge in the publication entry info container.
+        // The badge type is controlled by the 'show_altmetric_type' shortcode parameter.
+        // Falls back to 'donut' when no type is specified, ensuring backward compatibility.
+        if ( $settings['show_altmetric_entry'] && $row['doi'] !== '' ) {
+            $altm_type = ( ! empty( $settings['show_altmetric_type'] ) ) ? $settings['show_altmetric_type'] : 'donut';
+            $content .= TP_HTML_Publication_Template::get_info_container(
+                TP_HTML_Publication_Template::prepare_altmetric( $row['doi'], $altm_type ),
+                'altmetric',
+                $container_id
+            );
         }
 
         if ( $settings['show_dimensions_badge'] && $row['doi'] != '' ) {
@@ -373,7 +381,7 @@ class TP_Publication_Template_API {
         $content .= TP_HTML_Publication_Template::get_info_container( nl2br( TP_Bibtex::get_single_publication_bibtex($row, $keywords, $settings['convert_bibtex']) ), 'bibtex', $container_id );
 
         // div abstract
-        if ( $row['abstract'] != '' ) {
+        if ( $settings['show_abstract'] && $row['abstract'] != '' ) {
             $content .= TP_HTML_Publication_Template::get_info_container( TP_HTML::prepare_text($row['abstract']), 'abstract', $container_id );
         }
 
@@ -427,7 +435,7 @@ class TP_HTML_Publication_Template {
      * @since 6.0.0
      */
     public static function get_single ($row, $all_tags, $settings, $template, $template_settings, $pub_count = 0) {
-        $container_id = ( $settings['container_suffix'] != '' ) ? $row['pub_id'] . '_' . $settings['container_suffix'] : $row['pub_id'];
+        $container_id = ( $settings['container_suffix'] != '' ) ? $row['pub_id'] . '_' . tp_sanitize_key($settings['container_suffix']) : $row['pub_id'];
         $separator = $template_settings['button_separator'];
         $name = self::prepare_publication_title($row, $settings, $container_id);
         $images = self::handle_images($row, $settings, $template);
@@ -479,7 +487,7 @@ class TP_HTML_Publication_Template {
         }
 
         // Comment
-        if ( $settings['show_comment'] && $row['comment'] != '' ) {
+        if ( $settings['show_comment'] === true && $row['comment'] != '' ) {
             $link_text = ( $settings['comment_text'] != '' ) ? $settings['comment_text'] : esc_html__('Comment', 'teachpress');
             $link_tooltip = ( $settings['comment_tooltip'] != '' ) ? $settings['comment_tooltip'] : esc_html__('Show comment', 'teachpress');
             $comment = self::get_info_button($link_text, $link_tooltip, 'comment', $container_id) . $separator;
@@ -487,7 +495,7 @@ class TP_HTML_Publication_Template {
         }
 
         // if there is an abstract
-        if ( $row['abstract'] != '' ) {
+        if ( $settings['show_abstract'] === true && $row['abstract'] != '' ) {
             $abstract = self::get_info_button(esc_html__('Abstract','teachpress'), esc_html__('Show abstract','teachpress'), 'abstract', $container_id) . $separator;
             $is_button = true;
         }
@@ -522,7 +530,7 @@ class TP_HTML_Publication_Template {
         }
 
         // load template interface
-        $interface_data = array (
+        $interface_data = [
             'row'               => $row,
             'title'             => $name,
             'images'            => $images,
@@ -533,7 +541,7 @@ class TP_HTML_Publication_Template {
             'keywords'          => $keywords,
             'container_id'      => $container_id,
             'template_settings' => $template_settings
-        );
+        ];
 
         $interface = new TP_Publication_Template_API();
         $interface->set_data($interface_data);
@@ -818,10 +826,10 @@ class TP_HTML_Publication_Template {
             $parts[0] = trim( $parts[0] );
             $parts[1] = isset( $parts[1] ) ? $parts[1] : $parts[0];
             array_push($url_displayed, $parts[0]);
-            
+
             // Get the label based on the URL and title
             $label = self::get_url_label($parts[0], $parts[1]);
-            
+
             // list mode
             if ( $mode === 'list' ) {
                 $length = strlen($parts[1]);
@@ -869,7 +877,7 @@ class TP_HTML_Publication_Template {
     private static function get_url_label($url, $title) {
         $url = strtolower($url);
         $title = strtolower($title);
-        
+
         // Check for project-related terms in title
         $project_terms = array('project', 'homepage', 'website', 'site', 'webpage', 'page');
         foreach ($project_terms as $term) {
@@ -877,7 +885,7 @@ class TP_HTML_Publication_Template {
                 return 'Project Page';
             }
         }
-        
+
         // Check for common academic/social platforms
         if (strpos($url, 'arxiv.org') !== false) {
             return 'arXiv';
@@ -912,34 +920,93 @@ class TP_HTML_Publication_Template {
         if (strpos($url, 'instagram.com') !== false) {
             return 'Instagram';
         }
-        
+
         // Default to "Link" if no specific service is detected
         return 'Link';
     }
 
     /**
-     * Prepares an altmetric info block
-     * @param string $doi       The DOI number
-     * @return string
-     * @since 3.0.0
-     * @version 2
-     * @access public
+     * Get the appropriate label for a URL
+     * @param string $url The URL to get the label for
+     * @param string $title The title of the link
+     * @return string The label for the URL
      */
-    public static function prepare_altmetric($doi = '') {
-        $end = '';
-         /**
-         * Add DOI-URL
-         * @since 5.0.0
-         */
-        if ( $doi != '' ) {
-            $doi_url = TEACHPRESS_DOI_RESOLVER . $doi;
+    private static function get_url_label($url, $title) {
+        $url = strtolower($url);
+        $title = strtolower($title);
 
-            $end .= '<div data-badge-details="right" data-badge-type="large-donut" data-doi="'.$doi .'" data-condensed="true" class="altmetric-embed"></div>';
+        // Check for project-related terms in title
+        $project_terms = array('project', 'homepage', 'website', 'site', 'webpage', 'page');
+        foreach ($project_terms as $term) {
+            if (strpos($title, $term) !== false) {
+                return 'Project Page';
+            }
         }
 
-        return $end;
+        // Check for common academic/social platforms
+        if (strpos($url, 'arxiv.org') !== false) {
+            return 'arXiv';
+        }
+        if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
+            return 'YouTube';
+        }
+        if (strpos($url, 'github.com') !== false) {
+            return 'GitHub';
+        }
+        if (strpos($url, 'doi.org') !== false) {
+            return 'DOI';
+        }
+        if (strpos($url, 'slideshare.net') !== false) {
+            return 'SlideShare';
+        }
+        if (strpos($url, 'researchgate.net') !== false) {
+            return 'ResearchGate';
+        }
+        if (strpos($url, 'academia.edu') !== false) {
+            return 'Academia';
+        }
+        if (strpos($url, 'linkedin.com') !== false) {
+            return 'LinkedIn';
+        }
+        if (strpos($url, 'twitter.com') !== false) {
+            return 'Twitter';
+        }
+        if (strpos($url, 'facebook.com') !== false) {
+            return 'Facebook';
+        }
+        if (strpos($url, 'instagram.com') !== false) {
+            return 'Instagram';
+        }
+
+        // Default to "Link" if no specific service is detected
+        return 'Link';
     }
 
+/**
+ * Prepares an Altmetric badge block for a publication entry.
+ *
+ * Generates the HTML embed element for an Altmetric badge. The badge type
+ * can be customised via the $altm_type parameter. If no type is provided,
+ * 'large-donut' is used as the default to preserve backward compatibility.
+ *
+ * For available badge types see:
+ * https://badge-docs.altmetric.com/customizations.html#badge-types
+ *
+ * @param string $doi       The DOI of the publication. Defaults to empty string.
+ * @param string $altm_type The Altmetric badge type to render.
+ *                          Accepted values: 'donut', 'medium-donut', 'large-donut',
+ *                          'bar', 'medium-bar', 'large-bar', '1', '4'.
+ *                          Defaults to 'large-donut'.
+ * @return string           The HTML string for the Altmetric embed, or empty string if no DOI.
+ * @since 3.0.0
+ * @access public
+ */
+public static function prepare_altmetric( $doi = '', $altm_type = 'large-donut' ) {
+    if ( $doi === '' ) {
+        return '';
+    }
+    return '<div data-badge-details="right" data-badge-type="' . esc_attr( $altm_type ) . '" data-doi="' . esc_attr( $doi ) . '" data-condensed="true" class="altmetric-embed"></div>';
+}
 
 
 
@@ -1041,12 +1108,16 @@ class TP_HTML_Publication_Template {
         $image = TP_HTML_Publication_Template::handle_image_link ($image, $row, $settings);
 
         // Altmetric / Dimensions / Plumx
-        $altmetric = '';
+        $altmetric  = '';
         $dimensions = '';
-        $plumx = '';
-        
-        if( $settings['show_altmetric_donut']) {
-           $altmetric = '<div class="tp_pub_image_bottom"><div data-badge-type="medium-donut" data-doi="' . $row['doi']  . '" data-condensed="true" data-hide-no-mentions="true" class="altmetric-embed"></div></div>';
+        $plumx      = '';
+
+        // Render the Altmetric badge in the image area (donut position).
+        // The badge type is controlled by the 'show_altmetric_type' shortcode parameter.
+        // Falls back to 'donut' when no type is specified, ensuring backward compatibility.
+        if ( $settings['show_altmetric_donut'] ) {
+            $altm_type = ( ! empty( $settings['show_altmetric_type'] ) ) ? $settings['show_altmetric_type'] : 'donut';
+            $altmetric = '<div class="tp_pub_image_bottom"><div data-badge-type="' . esc_attr( $altm_type ) . '" data-doi="' . esc_attr( $row['doi'] ) . '" data-condensed="true" data-hide-no-mentions="true" class="altmetric-embed"></div></div>';
         }
 
         if ( $settings['show_dimensions_badge'] ) {
