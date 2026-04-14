@@ -925,63 +925,6 @@ class TP_HTML_Publication_Template {
         return 'Link';
     }
 
-    /**
-     * Get the appropriate label for a URL
-     * @param string $url The URL to get the label for
-     * @param string $title The title of the link
-     * @return string The label for the URL
-     */
-    private static function get_url_label($url, $title) {
-        $url = strtolower($url);
-        $title = strtolower($title);
-
-        // Check for project-related terms in title
-        $project_terms = array('project', 'homepage', 'website', 'site', 'webpage', 'page');
-        foreach ($project_terms as $term) {
-            if (strpos($title, $term) !== false) {
-                return 'Project Page';
-            }
-        }
-
-        // Check for common academic/social platforms
-        if (strpos($url, 'arxiv.org') !== false) {
-            return 'arXiv';
-        }
-        if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
-            return 'YouTube';
-        }
-        if (strpos($url, 'github.com') !== false) {
-            return 'GitHub';
-        }
-        if (strpos($url, 'doi.org') !== false) {
-            return 'DOI';
-        }
-        if (strpos($url, 'slideshare.net') !== false) {
-            return 'SlideShare';
-        }
-        if (strpos($url, 'researchgate.net') !== false) {
-            return 'ResearchGate';
-        }
-        if (strpos($url, 'academia.edu') !== false) {
-            return 'Academia';
-        }
-        if (strpos($url, 'linkedin.com') !== false) {
-            return 'LinkedIn';
-        }
-        if (strpos($url, 'twitter.com') !== false) {
-            return 'Twitter';
-        }
-        if (strpos($url, 'facebook.com') !== false) {
-            return 'Facebook';
-        }
-        if (strpos($url, 'instagram.com') !== false) {
-            return 'Instagram';
-        }
-
-        // Default to "Link" if no specific service is detected
-        return 'Link';
-    }
-
 /**
  * Prepares an Altmetric badge block for a publication entry.
  *
